@@ -5,6 +5,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "counter.h"
 
 // MANAGING BLOCK TABLES
@@ -154,25 +157,19 @@ TmpFile* createTmpFile(){
     if (fd == -1){
         exit(1);
     }
-    close(fd);
 
     TmpFile* tmpFile = calloc(1,sizeof(TmpFile));
     tmpFile->filename = calloc(strlen(fileName)+2, sizeof(char));
     strcpy(tmpFile->filename, fileName);
-
-    tmpFile->fd=NULL;
-    openFd(tmpFile, "wb+");
+    tmpFile->fd=fd;
 
     return tmpFile;
 }
 
 size_t tmpFileContentLength(TmpFile* tmpFile){
-
-    fseek(tmpFile->fd, 0, SEEK_END);
-    size_t length = ftell(tmpFile->fd);
-    fseek(tmpFile->fd, 0, SEEK_SET);
-
-    return length;
+    off_t size = lseek(tmpFile->fd, 0, SEEK_END);
+    lseek(tmpFile->fd, 0, SEEK_SET);
+    return size/sizeof(char);
 }
 
 char* getTmpFileContent(TmpFile* tmpFile){
@@ -184,9 +181,9 @@ char* getTmpFileContent(TmpFile* tmpFile){
         exit(1);
     }
 
-    fseek(tmpFile->fd, 0, SEEK_SET);
-    fread(buffer, sizeof(char), contentLength, tmpFile->fd);
-    fseek(tmpFile->fd, 0, SEEK_SET);
+    lseek(tmpFile->fd, 0, SEEK_SET);
+    read(tmpFile->fd,buffer, contentLength*sizeof(char));
+    lseek(tmpFile->fd, 0, SEEK_SET);
 
     return buffer;
 }
@@ -198,10 +195,10 @@ void removeTmpFile(TmpFile* tmpFile){
     free(tmpFile);
 }
 
-void openFd(TmpFile* tmpFile, const char* mode){
+void openFd(TmpFile* tmpFile){
     closeFd(tmpFile);
-    FILE* fd = fopen(tmpFile->filename, mode);
-    if (fd == NULL){
+    File fd = open(tmpFile->filename, O_RDWR);
+    if (fd == -1){
         fprintf(stderr, "Error while opening file...");
         exit(1);
     }
@@ -209,9 +206,9 @@ void openFd(TmpFile* tmpFile, const char* mode){
 }
 
 void closeFd(TmpFile* tmpFile){
-    if (tmpFile->fd != NULL){
-        fclose(tmpFile->fd);
-        tmpFile->fd=NULL;
+    if (tmpFile->fd != -1){
+        close(tmpFile->fd);
+        tmpFile->fd=-1;
     }
 }
 
