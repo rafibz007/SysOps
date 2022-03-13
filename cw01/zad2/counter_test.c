@@ -124,6 +124,7 @@ int main(int argc, char* argv[]){
             printf("Performed word counting and saved data in block with index=%lu\n%s\n", index, getBlockData(blockTable, index));
 
         } else { //invalid job
+            fprintf(stderr, "\nError at: %s\n", argv[argIndex]);
             printWrongInputExitMessage("Invalid job provided", argv);
             exit(1);
         }
