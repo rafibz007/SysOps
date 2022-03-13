@@ -161,18 +161,17 @@ TmpFile* createTmpFile(){
     strcpy(tmpFile->filename, fileName);
 
     tmpFile->fd=NULL;
+    openFd(tmpFile, "wb+");
 
     return tmpFile;
 }
 
 size_t tmpFileContentLength(TmpFile* tmpFile){
-    openFd(tmpFile, "r");
 
     fseek(tmpFile->fd, 0, SEEK_END);
     size_t length = ftell(tmpFile->fd);
     fseek(tmpFile->fd, 0, SEEK_SET);
 
-    closeFd(tmpFile);
     return length;
 }
 
@@ -185,29 +184,11 @@ char* getTmpFileContent(TmpFile* tmpFile){
         exit(1);
     }
 
-    openFd(tmpFile, "r");
-
+    fseek(tmpFile->fd, 0, SEEK_SET);
     fread(buffer, sizeof(char), contentLength, tmpFile->fd);
+    fseek(tmpFile->fd, 0, SEEK_SET);
 
-    closeFd(tmpFile);
     return buffer;
-}
-
-void appendTmpFileContent(TmpFile* tmpFile, char* data){
-    openFd(tmpFile, "a+");
-
-    fseek(tmpFile->fd, 0, SEEK_END);
-    fwrite(data, sizeof(char), strlen(data), tmpFile->fd);
-
-    closeFd(tmpFile);
-}
-
-void setTmpFileContent(TmpFile* tmpFile, char* data){
-    openFd(tmpFile, "w+");
-
-    fwrite(data, sizeof(char), strlen(data), tmpFile->fd);
-
-    closeFd(tmpFile);
 }
 
 void removeTmpFile(TmpFile* tmpFile){

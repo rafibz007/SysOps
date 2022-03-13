@@ -24,7 +24,7 @@ int main(int argc, char* argv[]){
     strcpy(OPTIONS[2], "remove_block");
 
     if (argc <= 2){
-        printUsage();
+        printUsage(argv);
         exit(1);
     }
 
@@ -38,7 +38,7 @@ int main(int argc, char* argv[]){
         if (strcmp(currentJob, OPTIONS[0])==0){ //create_table
             // check if size was provided
             if (argIndex+1>=argc || isValidOption(argv[argIndex+1])){
-                printUsage();
+                printUsage(argv);
                 exit(1);
             }
 
@@ -54,7 +54,7 @@ int main(int argc, char* argv[]){
         } else if (strcmp(currentJob, OPTIONS[2])==0){ //remove_block
             // check if index was provided
             if (argIndex+1>=argc || isValidOption(argv[argIndex+1])){
-                printUsage();
+                printUsage(argv);
                 exit(1);
             }
 
@@ -71,7 +71,7 @@ int main(int argc, char* argv[]){
             // check if filenames were provided
             // if no more arguments were provided, or next argument is not filename, but another option exit the program
             if (argIndex+1>=argc || isValidOption(argv[argIndex+1])){
-                printUsage();
+                printUsage(argv);
                 exit(1);
             }
 
@@ -121,12 +121,15 @@ bool isValidOption(char* option){
 }
 
 
-void printUsage(){
-    fprintf(stderr, "Provide arguments:\n"
+void printUsage(char** argv){
+    fprintf(stderr, "\nProvide arguments:\n"
                     "  1) Main table size : size_t\n"
                     "  2) Jobs with arguments : list\n"
                     "      create_table - size : size_t\n"
                     "      wc_files - file_names : char*\n"
-                    "      remove+block - index : size_t\n"
+                    "      remove_block - index : size_t\n"
+                    "\nExample usage:\n"
+                    "%s wc_files file1 create_table 3 wc_files file2 file3 wc_files file5 remove_block 0 wc_files file1 wc_files file4\n\n",
+                    argv[0]
                     );
 }
