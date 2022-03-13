@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <ctype.h>
 #include "counter.c"
 
 BlockTable* blockTable = NULL;
@@ -9,6 +10,8 @@ int OPTION_LEN = 3;
 
 void printUsage();
 bool isValidOption(char*);
+bool isNumber(char*);
+void printWrongInputExitMessage(char*, char**);
 
 
 /*arguments expected:
@@ -28,6 +31,11 @@ int main(int argc, char* argv[]){
         exit(1);
     }
 
+    // check if digit was provided
+    if (!isNumber(argv[1])){
+        printWrongInputExitMessage("Expected number as a first argument", argv);
+        exit(1);
+    }
     size_t initialSize = strtol(argv[1], NULL, 10);
     blockTable = createBlockTable(initialSize);
 
@@ -38,13 +46,20 @@ int main(int argc, char* argv[]){
         if (strcmp(currentJob, OPTIONS[0])==0){ //create_table
             // check if size was provided
             if (argIndex+1>=argc || isValidOption(argv[argIndex+1])){
-                printUsage(argv);
+                fprintf(stderr, "\nError at: %s\n", argv[argIndex+1]);
+                printWrongInputExitMessage("Expected argument after create_table", argv);
                 exit(1);
             }
 
             // go to next index, where table_size will be located
             argIndex++;
 
+            // check if digit was provided
+            if (!isNumber(argv[argIndex])){
+                fprintf(stderr, "\nError at: %s\n", argv[argIndex]);
+                printWrongInputExitMessage("Expected number after create_table", argv);
+                exit(1);
+            }
             size_t size = strtol(argv[argIndex], NULL, 10);
             removeBlockTable(blockTable);
             blockTable = createBlockTable(size);
@@ -54,13 +69,20 @@ int main(int argc, char* argv[]){
         } else if (strcmp(currentJob, OPTIONS[2])==0){ //remove_block
             // check if index was provided
             if (argIndex+1>=argc || isValidOption(argv[argIndex+1])){
-                printUsage(argv);
+                fprintf(stderr, "\nError at: %s\n", argv[argIndex+1]);
+                printWrongInputExitMessage("Expected argument after remove_block", argv);
                 exit(1);
             }
 
             // go to next index, where index will be located
             argIndex++;
 
+            // check if digit was provided
+            if (!isNumber(argv[argIndex])){
+                fprintf(stderr, "\nError at: %s\n", argv[argIndex]);
+                printWrongInputExitMessage("Expected number after remove_block", argv);
+                exit(1);
+            }
             size_t index = strtol(argv[argIndex], NULL, 10);
             removeBlock(blockTable,index);
 
@@ -71,7 +93,8 @@ int main(int argc, char* argv[]){
             // check if filenames were provided
             // if no more arguments were provided, or next argument is not filename, but another option exit the program
             if (argIndex+1>=argc || isValidOption(argv[argIndex+1])){
-                printUsage(argv);
+                fprintf(stderr, "\nError at: %s\n", argv[argIndex+1]);
+                printWrongInputExitMessage("Expected filenames after wc_files", argv);
                 exit(1);
             }
 
@@ -101,7 +124,7 @@ int main(int argc, char* argv[]){
             printf("Performed word counting and saved data in block with index=%lu\n%s\n", index, getBlockData(blockTable, index));
 
         } else { //invalid job
-            printUsage();
+            printWrongInputExitMessage("Invalid job provided", argv);
             exit(1);
         }
 
@@ -120,6 +143,18 @@ bool isValidOption(char* option){
     return false;
 }
 
+bool isNumber(char* value){
+    for (int i = 0; i < strlen(value); ++i) {
+        if (!isdigit(value[i]))
+            return false;
+    }
+    return true;
+}
+
+void printWrongInputExitMessage(char* message, char** argv){
+    fprintf(stderr, "\n%s\n", message);
+    printUsage(argv);
+}
 
 void printUsage(char** argv){
     fprintf(stderr, "\nProvide arguments:\n"
@@ -129,7 +164,7 @@ void printUsage(char** argv){
                     "      wc_files - file_names : char*\n"
                     "      remove_block - index : size_t\n"
                     "\nExample usage:\n"
-                    "%s wc_files file1 create_table 3 wc_files file2 file3 wc_files file5 remove_block 0 wc_files file1 wc_files file4\n\n",
+                    "%s 1 wc_files file1 create_table 3 wc_files file2 file3 wc_files file5 remove_block 0 wc_files file1 wc_files file4\n\n",
                     argv[0]
                     );
 }
