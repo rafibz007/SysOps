@@ -124,7 +124,7 @@ bool isValidOption(char* option){
 void printUsage(){
     fprintf(stderr, "Provide arguments:\n"
                     "  1) Main table size : size_t\n"
-                    "  2) Jobs with arguments:\n"
+                    "  2) Jobs with arguments : list\n"
                     "      create_table - size : size_t\n"
                     "      wc_files - file_names : char*\n"
                     "      remove+block - index : size_t\n"
