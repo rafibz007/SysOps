@@ -30,6 +30,21 @@ int main(int argc, char* argv[]){
 
     BlockTable* blockTable = NULL;
 
+    // PARSING FIRST ARGUMENT
+    if (argc <= 2){
+        printUsage(argv);
+        exit(1);
+    }
+
+    // check if digit was provided
+    if (!isNumber(argv[1])){
+        printWrongInputExitMessage("Expected number as a first argument", argv);
+        exit(1);
+    }
+    size_t initialSize = strtol(argv[1], NULL, 10);
+    blockTable = createBlockTable(initialSize);
+
+
     // PREPARING REPORT FILE
     const char* REPORT_FILE_NAME = "raport2.txt";
 
@@ -56,20 +71,7 @@ int main(int argc, char* argv[]){
     writeRowToReportFile(reportFile, "Action[:amount/size]", "System [s]", "User [s]", "Real [s]");
 
 
-    // PARSING ARGUMENTS
-    if (argc <= 2){
-        printUsage(argv);
-        exit(1);
-    }
-
-    // check if digit was provided
-    if (!isNumber(argv[1])){
-        printWrongInputExitMessage("Expected number as a first argument", argv);
-        exit(1);
-    }
-    size_t initialSize = strtol(argv[1], NULL, 10);
-    blockTable = createBlockTable(initialSize);
-
+    //PARSING JOBS
     int argIndex = 2;
     while (argIndex < argc){
         char* currentJob = argv[argIndex];
