@@ -1,7 +1,7 @@
 CC=gcc
 CFlags=-Wall -Werror -g
 
-all: test_static test_shared
+all: test_static clean clean_report
 
 static:
 	$(CC) $(CFlags) -c counter.c
@@ -20,3 +20,6 @@ test_shared: shared
 
 clean:
 	rm -f *.o *.so *.a
+
+clean_report:
+	rm -f raport2.txt
