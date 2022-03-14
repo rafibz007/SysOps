@@ -3,9 +3,14 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <string.h>
+#include <unistd.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "counter.h"
 
+// MANAGING BLOCK TABLES
 BlockTable* createBlockTable(size_t size){
     if (size == 0)
         size++;
@@ -32,7 +37,7 @@ void removeBlockTable(BlockTable* blockTable){
 
 
 
-
+// MANAGING BLOCKS
 size_t createBlock(BlockTable* blockTable){
     Block* block = calloc(1, sizeof(Block));
     if (block == NULL){
@@ -57,7 +62,7 @@ size_t createBlock(BlockTable* blockTable){
 //    array to small, resize it making it twice as big
     if (!indexFound){
         Block** buffer = blockTable->dataBlocks;
-        blockTable->dataBlocks = realloc(blockTable->dataBlocks, blockTable->size*2);
+        blockTable->dataBlocks = realloc(blockTable->dataBlocks, blockTable->size*2*sizeof(Block*));
         if (blockTable->dataBlocks == NULL){
             blockTable->dataBlocks = buffer;
             removeBlockTable(blockTable);
@@ -145,29 +150,26 @@ char* getBlockData(BlockTable* blockTable, size_t blockTableIndex){
 }
 
 
-
+// MANAGING TEMPORARY FILE
 TmpFile* createTmpFile(){
     char fileName[] = "/tmp/tmpFile.XXXXXX";
-    mkstemp(fileName);
+    int fd = mkstemp(fileName);
+    if (fd == -1){
+        exit(1);
+    }
 
     TmpFile* tmpFile = calloc(1,sizeof(TmpFile));
     tmpFile->filename = calloc(strlen(fileName)+2, sizeof(char));
     strcpy(tmpFile->filename, fileName);
-
-    tmpFile->fd=NULL;
+    tmpFile->fd=fd;
 
     return tmpFile;
 }
 
 size_t tmpFileContentLength(TmpFile* tmpFile){
-    openFd(tmpFile, "r");
-
-    fseek(tmpFile->fd, 0, SEEK_END);
-    size_t length = ftell(tmpFile->fd);
-    fseek(tmpFile->fd, 0, SEEK_SET);
-
-    closeFd(tmpFile);
-    return length;
+    off_t size = lseek(tmpFile->fd, 0, SEEK_END);
+    lseek(tmpFile->fd, 0, SEEK_SET);
+    return size/sizeof(char);
 }
 
 char* getTmpFileContent(TmpFile* tmpFile){
@@ -179,29 +181,11 @@ char* getTmpFileContent(TmpFile* tmpFile){
         exit(1);
     }
 
-    openFd(tmpFile, "r");
+    lseek(tmpFile->fd, 0, SEEK_SET);
+    read(tmpFile->fd,buffer, contentLength*sizeof(char));
+    lseek(tmpFile->fd, 0, SEEK_SET);
 
-    fread(buffer, sizeof(char), contentLength, tmpFile->fd);
-
-    closeFd(tmpFile);
     return buffer;
-}
-
-void appendTmpFileContent(TmpFile* tmpFile, char* data){
-    openFd(tmpFile, "a+");
-
-    fseek(tmpFile->fd, 0, SEEK_END);
-    fwrite(data, sizeof(char), strlen(data), tmpFile->fd);
-
-    closeFd(tmpFile);
-}
-
-void setTmpFileContent(TmpFile* tmpFile, char* data){
-    openFd(tmpFile, "w+");
-
-    fwrite(data, sizeof(char), strlen(data), tmpFile->fd);
-
-    closeFd(tmpFile);
 }
 
 void removeTmpFile(TmpFile* tmpFile){
@@ -211,28 +195,26 @@ void removeTmpFile(TmpFile* tmpFile){
     free(tmpFile);
 }
 
-void openFd(TmpFile* tmpFile, const char* mode){
+void openFd(TmpFile* tmpFile){
     closeFd(tmpFile);
-    FILE* fd = fopen(tmpFile->filename, mode);
-    if (fd == NULL){
+    File fd = open(tmpFile->filename, O_RDWR);
+    if (fd == -1){
         fprintf(stderr, "Error while opening file...");
         exit(1);
     }
     tmpFile->fd=fd;
 }
 
-
 void closeFd(TmpFile* tmpFile){
-    if (tmpFile->fd != NULL){
-        fclose(tmpFile->fd);
-        tmpFile->fd=NULL;
+    if (tmpFile->fd != -1){
+        close(tmpFile->fd);
+        tmpFile->fd=-1;
     }
 }
 
 
 
-
-
+// WORD COUNTING
 size_t createBlockFromTmpFileData(BlockTable *blockTable, TmpFile* file){
     size_t contentLength = tmpFileContentLength(file);
     char* buffer = calloc(contentLength+1, sizeof(char));

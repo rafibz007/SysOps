@@ -19,9 +19,10 @@ struct BlockTable{
 };
 typedef struct BlockTable BlockTable;
 
+typedef int File;
 struct TmpFile{
     char* filename;
-    FILE* fd;
+    File fd;
 };
 typedef struct TmpFile TmpFile;
 
@@ -41,10 +42,8 @@ char* getBlockData(BlockTable*, size_t); //returns block data
 TmpFile* createTmpFile(); //returns file handler
 size_t tmpFileContentLength(TmpFile*); //returns length of tmp file
 char* getTmpFileContent(TmpFile*); //returns content of tmp file
-void appendTmpFileContent(TmpFile*, char*);
-void setTmpFileContent(TmpFile*, char*);
 void removeTmpFile(TmpFile*);
-void openFd(TmpFile*, const char*);
+void openFd(TmpFile*);
 void closeFd(TmpFile*);
 
 size_t createBlockFromTmpFileData(BlockTable*, TmpFile*); //returns index of newly assigned block with data from tmp file
