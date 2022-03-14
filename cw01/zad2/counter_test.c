@@ -66,8 +66,6 @@ int main(int argc, char* argv[]){
         exit(1);
     }
 
-    if (fileExist)
-        fwrite("\n", sizeof(char), 1, reportFile); //add new line after prev header
     writeRowToReportFile(reportFile, "Action[:amount/size]", "System [s]", "User [s]", "Real [s]");
 
 
@@ -208,9 +206,9 @@ int main(int argc, char* argv[]){
                 filenamesLength += strlen(argv[argIndex]);
             }
 
-            size_t filenamesAmount = argIndex-filenamesStartIndex+2;
+            size_t filenamesAmount = argIndex-filenamesStartIndex+1;
 
-            char* filenames = calloc(filenamesLength+filenamesAmount, sizeof(char));
+            char* filenames = calloc(filenamesLength+filenamesAmount+1, sizeof(char));
             strcpy(filenames, "");
             for (size_t i = filenamesStartIndex; i <= argIndex; ++i) {
                 strcat(filenames, argv[i]);
@@ -245,6 +243,7 @@ int main(int argc, char* argv[]){
         argIndex++;
     }
 
+    fwrite("\n", sizeof(char), 1, reportFile);
     fclose(reportFile);
     return 0;
 }
