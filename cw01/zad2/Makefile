@@ -1,12 +1,12 @@
 CC=gcc
 CFlags=-Wall -Werror -g
 
-SHELL := /bin/bash
 
-all: counter_test_static counter_test_shared
+all: counter_test_static counter_test_shared clean
 
 
 # zdecydowałem się na generowanie plików z powodu małej ilości miejsca na UPeLu
+# dla nauki postanowilem napisac generacje w bashu, w nastepnym zad upieksze kod uzywajac generatora napisanego w c
 
 # test files generation constants
 LOREM1="Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
@@ -44,11 +44,11 @@ test: clean clean_report clean
 	@echo "====== STATIC - LARGE TEST  ======" >> $(REPORT_FILENAME)
 	make large_test_static
 	@echo "====== SHARED - SMALL TEST  ======" >> $(REPORT_FILENAME)
-	make small_test_static
+	make small_test_shared
 	@echo "====== SHARED - MEDIUM TEST ======" >> $(REPORT_FILENAME)
-	make medium_test_static
+	make medium_test_shared
 	@echo "====== SHARED - LARGE TEST  ======" >> $(REPORT_FILENAME)
-	make large_test_static
+	make large_test_shared
 
 
 # testing static
@@ -57,6 +57,7 @@ counter_test_static: static
 	$(CC) $(CFlags) counter_test.o libcounter.a -o test_static
 
 
+small_test_static: SHELL := /bin/bash
 small_test_static: counter_test_static
 	@ \
  	files=() \
@@ -74,12 +75,13 @@ small_test_static: counter_test_static
 		done; \
     done; \
     \
-    ./test_static 1 wc_files $${files[@]} create_table $(SMALL_BLOCK_ALLOCATIONS) add_remove_blocks $(SMALL_BLOCK_ALLOCATIONS);\
+    ./test_static 1 wc_files $${files[@]} remove_block 0 create_table $(SMALL_BLOCK_ALLOCATIONS) add_remove_blocks $(SMALL_BLOCK_ALLOCATIONS);\
     \
     for key in "$${!files[@]}" ; do \
 	  rm "$${files[$${key}]}"; \
 	done;
 
+medium_test_static: SHELL := /bin/bash
 medium_test_static: counter_test_static
 	@ \
 	files=() \
@@ -97,12 +99,13 @@ medium_test_static: counter_test_static
 		done; \
 	done; \
 	\
-	./test_static 1 wc_files $${files[@]} create_table $(MEDIUM_BLOCK_ALLOCATIONS) add_remove_blocks $(MEDIUM_BLOCK_ALLOCATIONS);\
+	./test_static 1 wc_files $${files[@]} remove_block 0 create_table $(MEDIUM_BLOCK_ALLOCATIONS) add_remove_blocks $(MEDIUM_BLOCK_ALLOCATIONS);\
 	\
 	for key in "$${!files[@]}" ; do \
 	  rm "$${files[$${key}]}"; \
 	done;
 
+large_test_static: SHELL := /bin/bash
 large_test_static: counter_test_static
 	@ \
 	files=() \
@@ -120,7 +123,7 @@ large_test_static: counter_test_static
 		done; \
 	done; \
 	\
-	./test_static 1 wc_files $${files[@]} create_table $(LARGE_BLOCK_ALLOCATIONS) add_remove_blocks $(LARGE_BLOCK_ALLOCATIONS);\
+	./test_static 1 wc_files $${files[@]} remove_block 0 create_table $(LARGE_BLOCK_ALLOCATIONS) add_remove_blocks $(LARGE_BLOCK_ALLOCATIONS);\
 	\
 	for key in "$${!files[@]}" ; do \
 	  rm "$${files[$${key}]}"; \
@@ -132,6 +135,7 @@ counter_test_shared: shared
 	$(CC) $(CFlags) counter_test.c -lcounter -L ./ -o test_shared
 
 
+small_test_shared: SHELL := /bin/bash
 small_test_shared: counter_test_shared
 	@ \
  	files=() \
@@ -149,12 +153,13 @@ small_test_shared: counter_test_shared
 		done; \
     done; \
     \
-    ./test_shared 1 wc_files $${files[@]} create_table $(SMALL_BLOCK_ALLOCATIONS) add_remove_blocks $(SMALL_BLOCK_ALLOCATIONS);\
+    ./test_shared 1 wc_files $${files[@]} remove_block 0 create_table $(SMALL_BLOCK_ALLOCATIONS) add_remove_blocks $(SMALL_BLOCK_ALLOCATIONS);\
     \
     for key in "$${!files[@]}" ; do \
 	  rm "$${files[$${key}]}"; \
 	done;
 
+medium_test_shared: SHELL := /bin/bash
 medium_test_shared: counter_test_shared
 	@ \
 	files=() \
@@ -172,12 +177,13 @@ medium_test_shared: counter_test_shared
 		done; \
 	done; \
 	\
-	./test_shared 1 wc_files $${files[@]} create_table $(MEDIUM_BLOCK_ALLOCATIONS) add_remove_blocks $(MEDIUM_BLOCK_ALLOCATIONS);\
+	./test_shared 1 wc_files $${files[@]} remove_block 0 create_table $(MEDIUM_BLOCK_ALLOCATIONS) add_remove_blocks $(MEDIUM_BLOCK_ALLOCATIONS);\
 	\
 	for key in "$${!files[@]}" ; do \
 	  rm "$${files[$${key}]}"; \
 	done;
 
+large_test_shared: SHELL := /bin/bash
 large_test_shared: counter_test_shared
 	@ \
 	files=() \
@@ -195,7 +201,7 @@ large_test_shared: counter_test_shared
 		done; \
 	done; \
 	\
-	./test_shared 1 wc_files $${files[@]} create_table $(LARGE_BLOCK_ALLOCATIONS) add_remove_blocks $(LARGE_BLOCK_ALLOCATIONS);\
+	./test_shared 1 wc_files $${files[@]} remove_block 0 create_table $(LARGE_BLOCK_ALLOCATIONS) add_remove_blocks $(LARGE_BLOCK_ALLOCATIONS);\
 	\
 	for key in "$${!files[@]}" ; do \
 	  rm "$${files[$${key}]}"; \

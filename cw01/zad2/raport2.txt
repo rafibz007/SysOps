@@ -1,34 +1,38 @@
 ====== STATIC - SMALL TEST  ======
 Action[:amount/size]             System [s]     User [s]     Real [s]
-count_files:10                     0.000000     0.000000     0.230000
+count_files:10                     0.000000     0.000000     0.200000
 read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
 remove_table                       0.000000     0.000000     0.000000
 create_table:1000                  0.000000     0.000000     0.000000
-add_blocks:1000                    0.000000     0.000000     0.000000
+add_blocks:1000                    0.000000     0.000000     0.010000
 remove_blocks:1000                 0.000000     0.000000     0.000000
 
 ====== STATIC - MEDIUM TEST ======
 Action[:amount/size]             System [s]     User [s]     Real [s]
-count_files:7                      0.000000     0.000000     0.170000
+count_files:7                      0.000000     0.000000     0.080000
 read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
 remove_table                       0.000000     0.000000     0.000000
 create_table:10000                 0.000000     0.000000     0.000000
-add_blocks:10000                   0.000000     0.050000     0.070000
+add_blocks:10000                   0.000000     0.060000     0.060000
 remove_blocks:10000                0.000000     0.000000     0.000000
 
 ====== STATIC - LARGE TEST  ======
 Action[:amount/size]             System [s]     User [s]     Real [s]
-count_files:4                      0.000000     0.000000     0.120000
+count_files:4                      0.000000     0.000000     0.160000
 read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
 remove_table                       0.000000     0.000000     0.000000
 create_table:100000                0.000000     0.000000     0.000000
-add_blocks:100000                  0.000000     4.990000     5.000000
-remove_blocks:100000               0.000000     0.000000     0.000000
+add_blocks:100000                  0.000000     5.060000     5.070000
+remove_blocks:100000               0.000000     0.000000     0.010000
 
 ====== SHARED - SMALL TEST  ======
 Action[:amount/size]             System [s]     User [s]     Real [s]
-count_files:10                     0.000000     0.000000     0.250000
+count_files:10                     0.000000     0.000000     0.220000
 read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
 remove_table                       0.000000     0.000000     0.000000
 create_table:1000                  0.000000     0.000000     0.000000
 add_blocks:1000                    0.000000     0.000000     0.000000
@@ -36,19 +40,21 @@ remove_blocks:1000                 0.000000     0.000000     0.000000
 
 ====== SHARED - MEDIUM TEST ======
 Action[:amount/size]             System [s]     User [s]     Real [s]
-count_files:7                      0.000000     0.000000     0.220000
+count_files:7                      0.000000     0.000000     0.130000
 read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
 remove_table                       0.000000     0.000000     0.000000
 create_table:10000                 0.000000     0.000000     0.000000
-add_blocks:10000                   0.000000     0.050000     0.050000
+add_blocks:10000                   0.000000     0.060000     0.070000
 remove_blocks:10000                0.000000     0.000000     0.000000
 
 ====== SHARED - LARGE TEST  ======
 Action[:amount/size]             System [s]     User [s]     Real [s]
-count_files:4                      0.000000     0.000000     0.080000
+count_files:4                      0.000000     0.000000     0.130000
 read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
 remove_table                       0.000000     0.000000     0.000000
 create_table:100000                0.000000     0.000000     0.000000
-add_blocks:100000                  0.000000     5.090000     5.100000
+add_blocks:100000                  0.000000     5.050000     5.140000
 remove_blocks:100000               0.000000     0.000000     0.000000
 
