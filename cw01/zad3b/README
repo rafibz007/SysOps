@@ -1,0 +1,1 @@
+Pomiary dla wszystkich typow bibliotek zwracaja bardzo zblizone pomiary, czesto mozna zauwazyc, ze biblioteki statyczne dawaly minimalnie lepsze czasy przy pomiarach, moze byc to jednak dzielem jedynie przypadku. Podobnie poziomy optymalizacji dla zadanych testow nie wykazywaly znaczacych roznic.

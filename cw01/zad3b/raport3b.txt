@@ -1,0 +1,455 @@
+====== OFlag = -O0  ======
+====== DYNAMIC - SMALL TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:10                     0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:1000                  0.000000     0.000000     0.000000
+add_blocks:1000                    0.000000     0.000000     0.010000
+remove_blocks:1000                 0.000000     0.000000     0.000000
+
+====== SHARED - SMALL TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:10                     0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:1000                  0.000000     0.000000     0.000000
+add_blocks:1000                    0.000000     0.000000     0.000000
+remove_blocks:1000                 0.000000     0.000000     0.000000
+
+====== STATIC - SMALL TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:10                     0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:1000                  0.000000     0.000000     0.000000
+add_blocks:1000                    0.000000     0.000000     0.000000
+remove_blocks:1000                 0.000000     0.000000     0.000000
+
+====== DYNAMIC - MEDIUM TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:7                      0.000000     0.000000     0.010000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:10000                 0.000000     0.000000     0.000000
+add_blocks:10000                   0.000000     0.050000     0.060000
+remove_blocks:10000                0.000000     0.000000     0.000000
+
+====== SHARED - MEDIUM TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:7                      0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:10000                 0.000000     0.000000     0.000000
+add_blocks:10000                   0.000000     0.060000     0.060000
+remove_blocks:10000                0.000000     0.000000     0.000000
+
+====== STATIC - MEDIUM TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:7                      0.000000     0.000000     0.010000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:10000                 0.000000     0.000000     0.000000
+add_blocks:10000                   0.000000     0.060000     0.060000
+remove_blocks:10000                0.000000     0.000000     0.000000
+
+====== DYNAMIC - LARGE TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:4                      0.000000     0.000000     0.010000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:100000                0.000000     0.000000     0.000000
+add_blocks:100000                  0.000000     5.080000     5.100000
+remove_blocks:100000               0.000000     0.000000     0.000000
+
+====== SHARED - LARGE TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:4                      0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:100000                0.000000     0.000000     0.000000
+add_blocks:100000                  0.000000     5.160000     5.160000
+remove_blocks:100000               0.000000     0.000000     0.010000
+
+====== STATIC - LARGE TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:4                      0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:100000                0.000000     0.000000     0.000000
+add_blocks:100000                  0.010000     5.020000     5.040000
+remove_blocks:100000               0.000000     0.000000     0.000000
+
+====== OFlag = -O1  ======
+====== DYNAMIC - SMALL TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:10                     0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:1000                  0.000000     0.000000     0.000000
+add_blocks:1000                    0.000000     0.000000     0.000000
+remove_blocks:1000                 0.000000     0.000000     0.000000
+
+====== SHARED - SMALL TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:10                     0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:1000                  0.000000     0.000000     0.000000
+add_blocks:1000                    0.000000     0.000000     0.000000
+remove_blocks:1000                 0.000000     0.000000     0.000000
+
+====== STATIC - SMALL TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:10                     0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:1000                  0.000000     0.000000     0.000000
+add_blocks:1000                    0.000000     0.000000     0.000000
+remove_blocks:1000                 0.000000     0.000000     0.000000
+
+====== DYNAMIC - MEDIUM TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:7                      0.000000     0.000000     0.010000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:10000                 0.000000     0.000000     0.000000
+add_blocks:10000                   0.000000     0.010000     0.020000
+remove_blocks:10000                0.000000     0.000000     0.000000
+
+====== SHARED - MEDIUM TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:7                      0.000000     0.000000     0.010000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:10000                 0.000000     0.000000     0.000000
+add_blocks:10000                   0.000000     0.020000     0.020000
+remove_blocks:10000                0.000000     0.000000     0.000000
+
+====== STATIC - MEDIUM TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:7                      0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:10000                 0.000000     0.000000     0.000000
+add_blocks:10000                   0.000000     0.020000     0.020000
+remove_blocks:10000                0.000000     0.000000     0.000000
+
+====== DYNAMIC - LARGE TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:4                      0.000000     0.000000     0.010000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:100000                0.000000     0.000000     0.000000
+add_blocks:100000                  0.000000     1.260000     1.280000
+remove_blocks:100000               0.000000     0.000000     0.000000
+
+====== SHARED - LARGE TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:4                      0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:100000                0.000000     0.000000     0.000000
+add_blocks:100000                  0.010000     1.230000     1.250000
+remove_blocks:100000               0.000000     0.000000     0.000000
+
+====== STATIC - LARGE TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:4                      0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:100000                0.000000     0.000000     0.000000
+add_blocks:100000                  0.000000     1.220000     1.240000
+remove_blocks:100000               0.000000     0.000000     0.000000
+
+====== OFlag = -O2  ======
+====== DYNAMIC - SMALL TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:10                     0.000000     0.000000     0.010000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:1000                  0.000000     0.000000     0.000000
+add_blocks:1000                    0.000000     0.000000     0.000000
+remove_blocks:1000                 0.000000     0.000000     0.000000
+
+====== SHARED - SMALL TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:10                     0.000000     0.000000     0.010000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:1000                  0.000000     0.000000     0.000000
+add_blocks:1000                    0.000000     0.000000     0.000000
+remove_blocks:1000                 0.000000     0.000000     0.000000
+
+====== STATIC - SMALL TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:10                     0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:1000                  0.000000     0.000000     0.000000
+add_blocks:1000                    0.000000     0.000000     0.000000
+remove_blocks:1000                 0.000000     0.000000     0.000000
+
+====== DYNAMIC - MEDIUM TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:7                      0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:10000                 0.000000     0.000000     0.000000
+add_blocks:10000                   0.000000     0.030000     0.030000
+remove_blocks:10000                0.000000     0.000000     0.000000
+
+====== SHARED - MEDIUM TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:7                      0.000000     0.000000     0.010000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:10000                 0.000000     0.000000     0.000000
+add_blocks:10000                   0.000000     0.020000     0.030000
+remove_blocks:10000                0.000000     0.000000     0.000000
+
+====== STATIC - MEDIUM TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:7                      0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:10000                 0.000000     0.000000     0.000000
+add_blocks:10000                   0.000000     0.020000     0.030000
+remove_blocks:10000                0.000000     0.000000     0.000000
+
+====== DYNAMIC - LARGE TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:4                      0.000000     0.000000     0.010000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:100000                0.000000     0.000000     0.000000
+add_blocks:100000                  0.000000     2.430000     2.430000
+remove_blocks:100000               0.000000     0.000000     0.000000
+
+====== SHARED - LARGE TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:4                      0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:100000                0.000000     0.000000     0.000000
+add_blocks:100000                  0.000000     1.660000     1.670000
+remove_blocks:100000               0.000000     0.000000     0.000000
+
+====== STATIC - LARGE TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:4                      0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:100000                0.000000     0.000000     0.000000
+add_blocks:100000                  0.010000     1.870000     1.880000
+remove_blocks:100000               0.000000     0.000000     0.000000
+
+====== OFlag = -O3  ======
+====== DYNAMIC - SMALL TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:10                     0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:1000                  0.000000     0.000000     0.000000
+add_blocks:1000                    0.000000     0.000000     0.000000
+remove_blocks:1000                 0.000000     0.000000     0.000000
+
+====== SHARED - SMALL TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:10                     0.000000     0.000000     0.010000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:1000                  0.000000     0.000000     0.000000
+add_blocks:1000                    0.000000     0.000000     0.010000
+remove_blocks:1000                 0.000000     0.000000     0.000000
+
+====== STATIC - SMALL TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:10                     0.000000     0.000000     0.010000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:1000                  0.000000     0.000000     0.000000
+add_blocks:1000                    0.000000     0.000000     0.000000
+remove_blocks:1000                 0.000000     0.000000     0.000000
+
+====== DYNAMIC - MEDIUM TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:7                      0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:10000                 0.000000     0.000000     0.000000
+add_blocks:10000                   0.000000     0.030000     0.030000
+remove_blocks:10000                0.000000     0.000000     0.000000
+
+====== SHARED - MEDIUM TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:7                      0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:10000                 0.000000     0.000000     0.000000
+add_blocks:10000                   0.000000     0.030000     0.030000
+remove_blocks:10000                0.000000     0.000000     0.000000
+
+====== STATIC - MEDIUM TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:7                      0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:10000                 0.000000     0.000000     0.000000
+add_blocks:10000                   0.000000     0.030000     0.040000
+remove_blocks:10000                0.000000     0.000000     0.000000
+
+====== DYNAMIC - LARGE TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:4                      0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:100000                0.000000     0.000000     0.000000
+add_blocks:100000                  0.000000     1.600000     1.610000
+remove_blocks:100000               0.000000     0.000000     0.000000
+
+====== SHARED - LARGE TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:4                      0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:100000                0.000000     0.000000     0.000000
+add_blocks:100000                  0.000000     2.450000     2.460000
+remove_blocks:100000               0.000000     0.000000     0.000000
+
+====== STATIC - LARGE TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:4                      0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:100000                0.000000     0.000000     0.000000
+add_blocks:100000                  0.000000     2.410000     2.410000
+remove_blocks:100000               0.000000     0.000000     0.000000
+
+====== OFlag = -Os  ======
+====== DYNAMIC - SMALL TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:10                     0.000000     0.000000     0.010000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:1000                  0.000000     0.000000     0.000000
+add_blocks:1000                    0.000000     0.000000     0.000000
+remove_blocks:1000                 0.000000     0.000000     0.000000
+
+====== SHARED - SMALL TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:10                     0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:1000                  0.000000     0.000000     0.000000
+add_blocks:1000                    0.000000     0.000000     0.000000
+remove_blocks:1000                 0.000000     0.000000     0.000000
+
+====== STATIC - SMALL TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:10                     0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:1000                  0.000000     0.000000     0.000000
+add_blocks:1000                    0.000000     0.000000     0.000000
+remove_blocks:1000                 0.000000     0.000000     0.000000
+
+====== DYNAMIC - MEDIUM TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:7                      0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:10000                 0.000000     0.000000     0.000000
+add_blocks:10000                   0.000000     0.020000     0.030000
+remove_blocks:10000                0.000000     0.000000     0.000000
+
+====== SHARED - MEDIUM TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:7                      0.000000     0.000000     0.030000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:10000                 0.000000     0.000000     0.000000
+add_blocks:10000                   0.000000     0.020000     0.020000
+remove_blocks:10000                0.000000     0.000000     0.000000
+
+====== STATIC - MEDIUM TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:7                      0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:10000                 0.000000     0.000000     0.000000
+add_blocks:10000                   0.000000     0.020000     0.020000
+remove_blocks:10000                0.000000     0.000000     0.000000
+
+====== DYNAMIC - LARGE TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:4                      0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:100000                0.000000     0.000000     0.000000
+add_blocks:100000                  0.000000     1.580000     1.580000
+remove_blocks:100000               0.000000     0.000000     0.010000
+
+====== SHARED - LARGE TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:4                      0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:100000                0.000000     0.000000     0.000000
+add_blocks:100000                  0.000000     1.570000     1.590000
+remove_blocks:100000               0.000000     0.000000     0.000000
+
+====== STATIC - LARGE TEST  ======
+Action[:amount/size]             System [s]     User [s]     Real [s]
+count_files:4                      0.000000     0.000000     0.020000
+read_to_block                      0.000000     0.000000     0.000000
+remove_block                       0.000000     0.000000     0.000000
+remove_table                       0.000000     0.000000     0.000000
+create_table:100000                0.000000     0.000000     0.000000
+add_blocks:100000                  0.000000     1.570000     1.580000
+remove_blocks:100000               0.000000     0.010000     0.000000
+
