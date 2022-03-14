@@ -62,7 +62,7 @@ size_t createBlock(BlockTable* blockTable){
 //    array to small, resize it making it twice as big
     if (!indexFound){
         Block** buffer = blockTable->dataBlocks;
-        blockTable->dataBlocks = realloc(blockTable->dataBlocks, blockTable->size*2);
+        blockTable->dataBlocks = realloc(blockTable->dataBlocks, blockTable->size*2*sizeof(Block*));
         if (blockTable->dataBlocks == NULL){
             blockTable->dataBlocks = buffer;
             removeBlockTable(blockTable);
