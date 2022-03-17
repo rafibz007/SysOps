@@ -8,7 +8,7 @@
 #include <ctype.h>
 
 #define MAX_LINE_LENGTH 256
-#define BUFF_SIZE 5
+#define BUFF_SIZE 256
 
 void copyWithDescriptors(char* fromFilename, char* toFilename);
 void copyWithStreams(char* fromFilename, char* toFilename);
@@ -66,12 +66,15 @@ int main(int argc, char** argv){
         exit(1);
     }
 
-//    printf("%s %s", fromFilename, toFilename);
-    copyWithDescriptors(fromFilename, toFilename);
+
+//    copyWithDescriptors(fromFilename, toFilename);
+    copyWithStreams(fromFilename, toFilename);
 
 
     return 0;
 }
+
+
 
 void copyWithDescriptors(char* fromFilename, char* toFilename){
     int fromFd = open(fromFilename, O_RDONLY);
@@ -199,4 +202,125 @@ void copyWithDescriptors(char* fromFilename, char* toFilename){
 }
 
 
-void copyWithStreams(char* fromFilename, char* toFilename){}
+void copyWithStreams(char* fromFilename, char* toFilename){
+    FILE* fromFd = fopen(fromFilename, "r");
+    FILE* toFd = fopen(toFilename, "w+");
+
+    if (fromFd == NULL){
+        fprintf(stderr,"Error while opening a file: %s", fromFilename);
+        exit(1);
+    } else if (toFd == NULL) {
+        fprintf(stderr,"Error while opening a file: %s", toFilename);
+        exit(1);
+    }
+
+//    append to file
+    fseek(toFd, 0, SEEK_END);
+
+    char* buff = calloc(BUFF_SIZE+1, sizeof(char));
+    char* tmpBuff = calloc(BUFF_SIZE+1, sizeof(char));
+
+    FILE* tmpFd = tmpfile();
+    if (tmpFd == NULL || buff == NULL || tmpBuff == NULL){
+        perror("Error occurred...");
+        exit(1);
+    }
+
+
+    size_t len;
+    size_t i;
+    size_t lineLength;
+    char* lineStart;
+    bool foundCharInLine = false;
+    bool reachedEOF = false;
+    bool tmpFileHasLineData = false;
+    size_t tmpContentLength = 0;
+    while (!reachedEOF){
+
+        len = fread(buff, sizeof(char), BUFF_SIZE, fromFd);
+        if (len < BUFF_SIZE){
+            reachedEOF = true;
+        }
+
+//        read from file into buffer BUFF_SIZE chars in a loop, parse input marking start of line and looking for end of line for each line
+//        if during this check non-white-char was found, save this line into file, if not, skip it
+//        if not whole line was loaded in the buffer it need to be parsed differently.
+//        If in this part of line, non-white-char was found, write rest of buff to file, but keep foundCharInLine true,
+//        to allow rest of line to be loaded
+//        If in this part of line some white-chars only were loaded, save them in tmp file, and load next chunk of data into
+//        buffer and if non-white-char before new line was found, save tmp file content and buffer line
+
+        lineLength = 0;
+        lineStart = buff;
+        for (i = 0; *(buff+i) && i < len; ++i) {
+
+            lineLength += 1;
+            if (*(buff+i)=='\n'){
+
+                if (foundCharInLine){
+
+                    if (tmpFileHasLineData){
+                        fseek(tmpFd, 0, SEEK_SET);
+                        fread(tmpBuff, sizeof(char), tmpContentLength, tmpFd);
+                        fwrite(tmpBuff, sizeof(char), tmpContentLength, toFd);
+                    }
+
+                    fwrite(lineStart, sizeof(char), lineLength, toFd);
+                }
+
+                lineLength = 0;
+                lineStart = buff+i+1;
+                foundCharInLine = false;
+
+                tmpFileHasLineData = false;
+                tmpContentLength = 0;
+
+            } else if (!isspace(*(buff+i))){
+                foundCharInLine = true;
+            }
+
+        }
+
+        if (foundCharInLine){
+
+            if (tmpFileHasLineData){
+                fseek(tmpFd, 0, SEEK_SET);
+                fread(tmpBuff, sizeof(char ), tmpContentLength, tmpFd);
+                fwrite(tmpBuff, sizeof(char ), tmpContentLength, toFd);
+                tmpFileHasLineData = false;
+                tmpContentLength = 0;
+            }
+
+            fwrite(lineStart, sizeof(char ), lineLength, toFd);
+
+        } else {
+
+//            save progress into tmp file and add it if this line continuation has chars
+            tmpFileHasLineData = true;
+            tmpContentLength += lineLength;
+            fwrite(lineStart, sizeof(char ), lineLength, tmpFd);
+
+        }
+
+
+
+
+    }
+
+//    replace new line in the end of file if one exists with space
+    fseek(toFd, -1, SEEK_END);
+    char* lastChar = calloc(2, sizeof(char));
+    fread(lastChar, sizeof(char ), 1, toFd);
+    if (strcmp(lastChar, "\n")==0){
+        fseek(toFd, -1, SEEK_END);
+        fwrite(" ", sizeof(char ), 1, toFd);
+    }
+
+
+    fclose(tmpFd);
+    fclose(toFd);
+    fclose(fromFd);
+    free(buff);
+    free(tmpBuff);
+
+}
