@@ -66,7 +66,7 @@ int main(int argc, char** argv){
         exit(1);
     }
 
-    printf("%s %s", fromFilename, toFilename);
+//    printf("%s %s", fromFilename, toFilename);
     copyWithDescriptors(fromFilename, toFilename);
 
 
@@ -75,7 +75,7 @@ int main(int argc, char** argv){
 
 void copyWithDescriptors(char* fromFilename, char* toFilename){
     int fromFd = open(fromFilename, O_RDONLY);
-    int toFd = open(toFilename, O_WRONLY);
+    int toFd = open(toFilename, O_RDWR);
 
     if (fromFd == -1){
         fprintf(stderr,"Error while opening a file: %s", fromFilename);
@@ -84,6 +84,9 @@ void copyWithDescriptors(char* fromFilename, char* toFilename){
         fprintf(stderr,"Error while opening a file: %s", toFilename);
         exit(1);
     }
+
+//    append to file
+    lseek(toFd, 0, SEEK_END);
 
     char* buff = calloc(BUFF_SIZE+1, sizeof(char));
     char* tmpBuff = calloc(BUFF_SIZE+1, sizeof(char));
@@ -119,7 +122,6 @@ void copyWithDescriptors(char* fromFilename, char* toFilename){
 //        to allow rest of line to be loaded
 //        If in this part of line some white-chars only were loaded, save them in tmp file, and load next chunk of data into
 //        buffer and if non-white-char before new line was found, save tmp file content and buffer line
-
 
         lineLength = 0;
         lineStart = buff;
@@ -175,7 +177,18 @@ void copyWithDescriptors(char* fromFilename, char* toFilename){
 
 
 
+
     }
+
+//    replace new line in the end of file if one exists with space
+    lseek(toFd, -1, SEEK_END);
+    char* lastChar = calloc(2, sizeof(char));
+    read(toFd, lastChar, 1* sizeof(char ));
+    if (strcmp(lastChar, "\n")==0){
+        lseek(toFd, -1, SEEK_END);
+        write(toFd, " ", 1);
+    }
+
 
     close(tmpFd);
     close(toFd);
