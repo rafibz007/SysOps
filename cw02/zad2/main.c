@@ -23,7 +23,7 @@ int main(int argc, char** argv){
     }
 
     char seekChar;
-    char* filename = calloc(sizeof(char ), strlen(argv[2]));
+    char* filename = calloc(strlen(argv[2])+1, sizeof(char ));
     if (filename == NULL){
         perror("Not enough memory");
         exit(1);
