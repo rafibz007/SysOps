@@ -1,0 +1,27 @@
+Type                             System [s]     User [s]     Real [s]
+Descriptors                        0.010000     0.000000     0.020000
+Streams                            0.000000     0.000000     0.000000
+Type                             System [s]     User [s]     Real [s]
+Descriptors                        0.090000     0.020000     0.120000
+Streams                            0.000000     0.020000     0.020000
+Type                             System [s]     User [s]     Real [s]
+Descriptors                        1.080000     0.120000     1.210000
+Streams                            0.070000     0.140000     0.200000
+Type                             System [s]     User [s]     Real [s]
+Descriptors                        0.010000     0.000000     0.020000
+Streams                            0.000000     0.000000     0.000000
+Type                             System [s]     User [s]     Real [s]
+Descriptors                        0.110000     0.000000     0.130000
+Streams                            0.020000     0.010000     0.020000
+Type                             System [s]     User [s]     Real [s]
+Descriptors                        1.060000     0.130000     1.200000
+Streams                            0.070000     0.140000     0.210000
+Type                             System [s]     User [s]     Real [s]
+Descriptors                        0.010000     0.000000     0.010000
+Streams                            0.000000     0.000000     0.000000
+Type                             System [s]     User [s]     Real [s]
+Descriptors                        0.110000     0.010000     0.120000
+Streams                            0.010000     0.010000     0.020000
+Type                             System [s]     User [s]     Real [s]
+Descriptors                        1.070000     0.100000     1.180000
+Streams                            0.070000     0.130000     0.210000

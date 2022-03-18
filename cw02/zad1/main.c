@@ -68,11 +68,6 @@ int main(int argc, char** argv){
         exit(1);
     }
 
-//    if (access(reportFilename, F_OK)!=0){
-//        creat()
-//    } else if (access(reportFilename, W_OK)!=0){
-//
-//    }
 
     reportFile = fopen(reportFilename, "a+");
     if (reportFile == NULL){
