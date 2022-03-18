@@ -13,6 +13,10 @@
 void copyWithDescriptors(char* fromFilename, char* toFilename);
 void copyWithStreams(char* fromFilename, char* toFilename);
 
+void addTmpContentWithFd(int tmpFd, int toFd, char** tmpBuff, size_t tmpContentLength, size_t* tmpBuffSize);
+void addTmpContentWithStreams(FILE* tmpFd, FILE* toFd, char** tmpBuff, size_t tmpContentLength, size_t* tmpBuffSize);
+
+
 int main(int argc, char** argv){
     char* fromFilename = calloc(101, sizeof(char));
     char* toFilename = calloc(101, sizeof(char));
@@ -78,7 +82,7 @@ int main(int argc, char** argv){
 
 void copyWithDescriptors(char* fromFilename, char* toFilename){
     int fromFd = open(fromFilename, O_RDONLY);
-    int toFd = open(toFilename, O_RDWR);
+    int toFd = open(toFilename, O_WRONLY);
 
     if (fromFd == -1){
         fprintf(stderr,"Error while opening a file: %s", fromFilename);
@@ -93,6 +97,7 @@ void copyWithDescriptors(char* fromFilename, char* toFilename){
 
     char* buff = calloc(BUFF_SIZE+1, sizeof(char));
     char* tmpBuff = calloc(BUFF_SIZE+1, sizeof(char));
+    size_t tmpBuffSize = BUFF_SIZE+1;
 
     char filename[] = "/tmp/tmpFile.XXXXXX";
     int tmpFd = mkstemp(filename);
@@ -102,7 +107,7 @@ void copyWithDescriptors(char* fromFilename, char* toFilename){
     }
     unlink(filename);
 
-
+    bool firstLineAdded = false;
     ssize_t len;
     size_t i;
     size_t lineLength;
@@ -130,44 +135,111 @@ void copyWithDescriptors(char* fromFilename, char* toFilename){
         lineStart = buff;
         for (i = 0; *(buff+i) && i < len; ++i) {
 
-            lineLength += 1;
             if (*(buff+i)=='\n'){
 
                 if (foundCharInLine){
 
-                    if (tmpFileHasLineData){
-                        lseek(tmpFd, 0, SEEK_SET);
-                        read(tmpFd, tmpBuff, tmpContentLength*sizeof(char));
-                        write(toFd, tmpBuff, tmpContentLength);
+//                    remove new line when first line appended to file
+                    if (!firstLineAdded){
+
+                        if (tmpFileHasLineData){
+
+                            lseek(tmpFd, 0, SEEK_SET);
+                            if (tmpBuffSize < tmpContentLength+1){
+                                tmpBuffSize = tmpContentLength+1;
+                                free(tmpBuff);
+                                tmpBuff = calloc(tmpContentLength+1, sizeof(char));
+                                if (tmpBuff == NULL){
+                                    perror("Error occurred");
+                                    exit(1);
+                                }
+                            }
+                            read(tmpFd, tmpBuff, tmpContentLength*sizeof(char));
+
+                            if (tmpBuff[0]=='\n'){
+                                write(toFd, tmpBuff+1, tmpContentLength-1);
+                            } else {
+                                write(toFd, tmpBuff, tmpContentLength);
+                            }
+
+                        }
+                        if (*lineStart=='\n'){
+                            write(toFd, lineStart+1, lineLength-1);
+                        } else {
+                            write(toFd, lineStart, lineLength);
+                        }
+
+                        firstLineAdded = true;
+                    } else {
+                        if (tmpFileHasLineData)
+                            addTmpContentWithFd(tmpFd,toFd,&tmpBuff,tmpContentLength, &tmpBuffSize);
+
+                        write(toFd, lineStart, lineLength);
                     }
 
-                    write(toFd, lineStart, lineLength);
                 }
 
                 lineLength = 0;
-                lineStart = buff+i+1;
+                lineStart = buff+i;
                 foundCharInLine = false;
 
                 tmpFileHasLineData = false;
                 tmpContentLength = 0;
+                lseek(tmpFd, 0, SEEK_SET);
 
             } else if (!isspace(*(buff+i))){
                 foundCharInLine = true;
             }
+            lineLength++;
 
         }
 
         if (foundCharInLine){
 
-            if (tmpFileHasLineData){
-                lseek(tmpFd, 0, SEEK_SET);
-                read(tmpFd, tmpBuff, tmpContentLength*sizeof(char));
-                write(toFd, tmpBuff, tmpContentLength);
-                tmpFileHasLineData = false;
-                tmpContentLength = 0;
-            }
+            //                    remove new line when first line appended to file
+            if (!firstLineAdded){
 
-            write(toFd, lineStart, lineLength);
+                if (tmpFileHasLineData){
+
+                    lseek(tmpFd, 0, SEEK_SET);
+                    if (tmpBuffSize < tmpContentLength+1){
+                        tmpBuffSize = tmpContentLength+1;
+                        free(tmpBuff);
+                        tmpBuff = calloc(tmpContentLength+1, sizeof(char));
+                        if (tmpBuff == NULL){
+                            perror("Error occurred");
+                            exit(1);
+                        }
+                    }
+                    read(tmpFd, tmpBuff, tmpContentLength*sizeof(char));
+
+                    if (tmpBuff[0]=='\n'){
+                        write(toFd, tmpBuff+1, tmpContentLength-1);
+                    } else {
+                        write(toFd, tmpBuff, tmpContentLength);
+                    }
+
+                    tmpFileHasLineData = false;
+                    tmpContentLength = 0;
+                    lseek(tmpFd, 0, SEEK_SET);
+                }
+                if (*lineStart=='\n'){
+                    write(toFd, lineStart+1, lineLength-1);
+                } else {
+                    write(toFd, lineStart, lineLength);
+                }
+
+                firstLineAdded = true;
+            } else {
+                if (tmpFileHasLineData){
+                    addTmpContentWithFd(tmpFd,toFd,&tmpBuff,tmpContentLength, &tmpBuffSize);
+                    tmpFileHasLineData = false;
+                    tmpContentLength = 0;
+                    lseek(tmpFd, 0, SEEK_SET);
+                }
+
+                write(toFd, lineStart, lineLength);
+            }
 
         } else {
 
@@ -178,18 +250,6 @@ void copyWithDescriptors(char* fromFilename, char* toFilename){
 
         }
 
-
-
-
-    }
-
-//    replace new line in the end of file if one exists with space
-    lseek(toFd, -1, SEEK_END);
-    char* lastChar = calloc(2, sizeof(char));
-    read(toFd, lastChar, 1* sizeof(char ));
-    if (strcmp(lastChar, "\n")==0){
-        lseek(toFd, -1, SEEK_END);
-        write(toFd, " ", 1);
     }
 
 
@@ -201,10 +261,9 @@ void copyWithDescriptors(char* fromFilename, char* toFilename){
 
 }
 
-
 void copyWithStreams(char* fromFilename, char* toFilename){
     FILE* fromFd = fopen(fromFilename, "r");
-    FILE* toFd = fopen(toFilename, "w+");
+    FILE* toFd = fopen(toFilename, "a");
 
     if (fromFd == NULL){
         fprintf(stderr,"Error while opening a file: %s", fromFilename);
@@ -219,6 +278,7 @@ void copyWithStreams(char* fromFilename, char* toFilename){
 
     char* buff = calloc(BUFF_SIZE+1, sizeof(char));
     char* tmpBuff = calloc(BUFF_SIZE+1, sizeof(char));
+    size_t tmpBuffSize = BUFF_SIZE+1;
 
     FILE* tmpFd = tmpfile();
     if (tmpFd == NULL || buff == NULL || tmpBuff == NULL){
@@ -226,7 +286,7 @@ void copyWithStreams(char* fromFilename, char* toFilename){
         exit(1);
     }
 
-
+    bool firstLineAdded = false;
     size_t len;
     size_t i;
     size_t lineLength;
@@ -237,7 +297,7 @@ void copyWithStreams(char* fromFilename, char* toFilename){
     size_t tmpContentLength = 0;
     while (!reachedEOF){
 
-        len = fread(buff, sizeof(char), BUFF_SIZE, fromFd);
+        len = fread(buff, sizeof(char ), BUFF_SIZE, fromFd);
         if (len < BUFF_SIZE){
             reachedEOF = true;
         }
@@ -254,44 +314,112 @@ void copyWithStreams(char* fromFilename, char* toFilename){
         lineStart = buff;
         for (i = 0; *(buff+i) && i < len; ++i) {
 
-            lineLength += 1;
             if (*(buff+i)=='\n'){
 
                 if (foundCharInLine){
 
-                    if (tmpFileHasLineData){
-                        fseek(tmpFd, 0, SEEK_SET);
-                        fread(tmpBuff, sizeof(char), tmpContentLength, tmpFd);
-                        fwrite(tmpBuff, sizeof(char), tmpContentLength, toFd);
+//                    remove new line when first line appended to file
+                    if (!firstLineAdded){
+
+                        if (tmpFileHasLineData){
+
+                            fseek(tmpFd, 0, SEEK_SET);
+                            if (tmpBuffSize < tmpContentLength+1){
+                                tmpBuffSize = tmpContentLength+1;
+                                free(tmpBuff);
+                                tmpBuff = calloc(tmpContentLength+1, sizeof(char));
+                                if (tmpBuff == NULL){
+                                    perror("Error occurred");
+                                    exit(1);
+                                }
+                            }
+                            fread(tmpBuff, sizeof(char), tmpContentLength, tmpFd);
+
+                            if (tmpBuff[0]=='\n'){
+                                fwrite(tmpBuff+1, sizeof(char ), tmpContentLength-1, toFd);
+                            } else {
+                                fwrite(tmpBuff, sizeof(char ), tmpContentLength, toFd);
+                            }
+
+                        }
+                        if (*lineStart=='\n'){
+                            fwrite(lineStart+1, sizeof(char ), lineLength-1, toFd);
+                        } else {
+                            fwrite(lineStart, sizeof(char ), lineLength, toFd);
+                        }
+
+                        firstLineAdded = true;
+                    } else {
+                        if (tmpFileHasLineData)
+                            addTmpContentWithStreams(tmpFd,toFd,&tmpBuff,tmpContentLength, &tmpBuffSize);
+
+                        fwrite(lineStart, sizeof(char ), lineLength, toFd);
                     }
 
-                    fwrite(lineStart, sizeof(char), lineLength, toFd);
                 }
 
                 lineLength = 0;
-                lineStart = buff+i+1;
+                lineStart = buff+i;
                 foundCharInLine = false;
 
                 tmpFileHasLineData = false;
                 tmpContentLength = 0;
+                fseek(tmpFd, 0, SEEK_SET);
 
             } else if (!isspace(*(buff+i))){
                 foundCharInLine = true;
             }
+            lineLength++;
 
         }
 
         if (foundCharInLine){
 
-            if (tmpFileHasLineData){
-                fseek(tmpFd, 0, SEEK_SET);
-                fread(tmpBuff, sizeof(char ), tmpContentLength, tmpFd);
-                fwrite(tmpBuff, sizeof(char ), tmpContentLength, toFd);
-                tmpFileHasLineData = false;
-                tmpContentLength = 0;
-            }
+            //                    remove new line when first line appended to file
+            if (!firstLineAdded){
 
-            fwrite(lineStart, sizeof(char ), lineLength, toFd);
+                if (tmpFileHasLineData){
+
+                    fseek(tmpFd, 0, SEEK_SET);
+                    if (tmpBuffSize < tmpContentLength+1){
+                        tmpBuffSize = tmpContentLength+1;
+                        free(tmpBuff);
+                        tmpBuff = calloc(tmpContentLength+1, sizeof(char));
+                        if (tmpBuff == NULL){
+                            perror("Error occurred");
+                            exit(1);
+                        }
+                    }
+
+                    fread(tmpBuff, sizeof(char ), tmpContentLength, tmpFd);
+
+                    if (tmpBuff[0]=='\n'){
+                        fwrite(tmpBuff+1, sizeof(char ), tmpContentLength-1, toFd);
+                    } else {
+                        fwrite(tmpBuff, sizeof(char ), tmpContentLength, toFd);
+                    }
+
+                    tmpFileHasLineData = false;
+                    tmpContentLength = 0;
+                    fseek(tmpFd, 0, SEEK_SET);
+                }
+                if (*lineStart=='\n'){
+                    fwrite(lineStart+1, sizeof(char ), lineLength-1, toFd);
+                } else {
+                    fwrite(lineStart, sizeof(char ), lineLength, toFd);;
+                }
+
+                firstLineAdded = true;
+            } else {
+                if (tmpFileHasLineData){
+                    addTmpContentWithStreams(tmpFd,toFd,&tmpBuff,tmpContentLength, &tmpBuffSize);
+                    tmpFileHasLineData = false;
+                    tmpContentLength = 0;
+                    fseek(tmpFd, 0, SEEK_SET);
+                }
+
+                fwrite(lineStart, sizeof(char ), lineLength, toFd);
+            }
 
         } else {
 
@@ -302,18 +430,6 @@ void copyWithStreams(char* fromFilename, char* toFilename){
 
         }
 
-
-
-
-    }
-
-//    replace new line in the end of file if one exists with space
-    fseek(toFd, -1, SEEK_END);
-    char* lastChar = calloc(2, sizeof(char));
-    fread(lastChar, sizeof(char ), 1, toFd);
-    if (strcmp(lastChar, "\n")==0){
-        fseek(toFd, -1, SEEK_END);
-        fwrite(" ", sizeof(char ), 1, toFd);
     }
 
 
@@ -322,5 +438,35 @@ void copyWithStreams(char* fromFilename, char* toFilename){
     fclose(fromFd);
     free(buff);
     free(tmpBuff);
+}
 
+
+void addTmpContentWithFd(int tmpFd, int toFd, char** tmpBuff, size_t tmpContentLength, size_t* tmpBuffSize){
+    lseek(tmpFd, 0, SEEK_SET);
+    if (*tmpBuffSize < tmpContentLength+1){
+        *tmpBuffSize = tmpContentLength+1;
+        free(*tmpBuff);
+        *tmpBuff = calloc(tmpContentLength+1, sizeof(char));
+        if (*tmpBuff == NULL){
+            perror("Error occurred");
+            exit(1);
+        }
+    }
+    read(tmpFd, *tmpBuff, tmpContentLength*sizeof(char));
+    write(toFd, *tmpBuff, tmpContentLength);
+}
+
+void addTmpContentWithStreams(FILE* tmpFd, FILE* toFd, char** tmpBuff, size_t tmpContentLength, size_t* tmpBuffSize){
+    fseek(tmpFd, 0, SEEK_SET);
+    if (*tmpBuffSize < tmpContentLength+1){
+        *tmpBuffSize = tmpContentLength+1;
+        free(*tmpBuff);
+        *tmpBuff = calloc(tmpContentLength+1, sizeof(char));
+        if (*tmpBuff == NULL){
+            perror("Error occurred");
+            exit(1);
+        }
+    }
+    fread(*tmpBuff, sizeof(char ), tmpContentLength, tmpFd);
+    fwrite(*tmpBuff, sizeof(char ), tmpContentLength, toFd);
 }
