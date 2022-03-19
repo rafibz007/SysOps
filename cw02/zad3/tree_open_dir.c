@@ -37,8 +37,25 @@ void printFileData(char* path, struct stat* statistics, struct dirent* entry){
             break;
     }
 
+
+
+    struct tm *aTm = localtime(&statistics->st_atim.tv_sec);
+    struct tm *mTm = localtime(&statistics->st_mtim.tv_sec);
+
+    char* accessDate = asctime(aTm);
+    char* modifiedDate = asctime(mTm);
+
+
+    accessDate[strcspn(accessDate, "\n")]=0;
+    modifiedDate[strcspn(modifiedDate, "\n")]=0;
+
 //    %6s   %10s   %15s   %15s   %15s   %s
-    printf("%6lu   %10s   %15ld   %15ld   %15ld   %s\n", statistics->st_nlink, type, statistics->st_size, statistics->st_atim.tv_sec, statistics->st_mtim.tv_sec, path);
+    printf("%6lu   %10s   %15ld   %25s   %25s   %s\n",
+           statistics->st_nlink,
+           type, statistics->st_size,
+           accessDate,
+           modifiedDate,
+           path);
 }
 
 struct resultsOpenDir* visitAndCountWithOpenDir(char* nextDir, size_t depth){
@@ -69,7 +86,7 @@ struct resultsOpenDir* visitAndCountWithOpenDir(char* nextDir, size_t depth){
     }
 
     if (depth==0){
-        printf("%6s   %10s   %15s   %15s   %15s   %s\n", "LINKS", "TYPE", "SIZE", "LAST_ACC", "LAST_MOD", "PATH");
+        printf("%6s   %10s   %15s   %25s   %25s   %s\n", "LINKS", "TYPE", "SIZE", "LAST_ACC", "LAST_MOD", "PATH");
     }
 
     struct resultsOpenDir* res = calloc(1, sizeof(struct resultsOpenDir));
@@ -90,6 +107,10 @@ struct resultsOpenDir* visitAndCountWithOpenDir(char* nextDir, size_t depth){
             exit(1);
         }
 
+        if (strcmp(entry->d_name, "..")==0 || strcmp(entry->d_name, ".")==0){
+            entry = readdir(dir);
+            continue;
+        }
 
         switch (statistics->st_mode & S_IFMT) {
             case S_IFSOCK:

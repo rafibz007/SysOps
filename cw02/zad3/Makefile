@@ -12,10 +12,7 @@ tree_open_dir:
 	ar rcs libtreeopendir.a tree_open_dir.o
 
 main_nftw:
-
-
-tree_nftw:
-
+	$(CC) $(CFlags) mainNftw.c -o mainNftw
 
 clean:
 	rm -f *.o *.a

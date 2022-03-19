@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 #include <dirent.h>
 #include <sys/stat.h>
 
