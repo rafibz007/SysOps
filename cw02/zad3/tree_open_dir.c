@@ -5,9 +5,8 @@ void treeWithOpenDir(char* dirName){
     printf("Files: %lu  Dirs:%lu  CharDevs:%lu  BlockDevs:%lu  SLinks:%lu  FIFOs:%lu  Socks:%lu\n", res->files, res->dirs, res->charDevs, res->blocks, res->slinks, res->fifos, res->socks);
 }
 
-void printFileData(char* path, struct stat* statistics, struct dirent* entry){
+void printFileData(char* path, struct stat* statistics){
     assert(statistics!=NULL);
-    assert(entry!=NULL);
 
     char type[10];
     switch (statistics->st_mode & S_IFMT) {
@@ -66,18 +65,6 @@ struct resultsOpenDir* visitAndCountWithOpenDir(char* nextDir, size_t depth){
         exit(1);
     }
 
-    chdir(nextDir);
-
-    struct dirent* entry;
-    struct stat* statistics = calloc(1, sizeof(struct stat));
-
-
-    if (statistics==NULL){
-        perror("Not enough memory");
-        exit(1);
-    }
-
-
     char cwd[PATH_MAX+1];
     char path[2*PATH_MAX+1];
     if (getcwd(cwd, sizeof(cwd)) == NULL){
@@ -89,6 +76,14 @@ struct resultsOpenDir* visitAndCountWithOpenDir(char* nextDir, size_t depth){
         printf("%6s   %10s   %15s   %25s   %25s   %s\n", "LINKS", "TYPE", "SIZE", "LAST_ACC", "LAST_MOD", "PATH");
     }
 
+    struct dirent* entry;
+    struct stat* statistics = calloc(1, sizeof(struct stat));
+
+    if (statistics==NULL){
+        perror("Not enough memory");
+        exit(1);
+    }
+
     struct resultsOpenDir* res = calloc(1, sizeof(struct resultsOpenDir));
     res->files=0;
     res->blocks=0;
@@ -98,10 +93,38 @@ struct resultsOpenDir* visitAndCountWithOpenDir(char* nextDir, size_t depth){
     res->socks=0;
     res->dirs=0;
 
+
+//    count current dir
+    int s = lstat(nextDir, statistics);
+    if (s==-1){
+        fprintf(stderr, "Error reading stat from file: %s\n", nextDir);
+        exit(1);
+    }
+
+    switch (statistics->st_mode & S_IFMT) {
+        case S_IFDIR:
+            res->dirs++;
+            break;
+        default:
+            break;
+    }
+
+    snprintf(path, 2*PATH_MAX, "%s/%s", cwd, nextDir);
+    printFileData(path, statistics);
+
+//    step into dir and count children
+    chdir(nextDir);
+
+    if (getcwd(cwd, sizeof(cwd)) == NULL){
+        perror("Error getting current working directory");
+        exit(1);
+    }
+
+//    count all non-dir children
     struct resultsOpenDir* chRes;
     entry = readdir(dir);
     while (entry){
-        int s = stat(entry->d_name, statistics);
+        int s = lstat(entry->d_name, statistics);
         if (s==-1){
             fprintf(stderr, "Error reading stat from file: %s\n", entry->d_name);
             exit(1);
@@ -126,7 +149,7 @@ struct resultsOpenDir* visitAndCountWithOpenDir(char* nextDir, size_t depth){
                 res->blocks++;
                 break;
             case S_IFDIR:
-                res->dirs++;
+//                res->dirs++;
                 break;
             case S_IFCHR:
                 res->charDevs++;
@@ -139,9 +162,10 @@ struct resultsOpenDir* visitAndCountWithOpenDir(char* nextDir, size_t depth){
         }
 
 
-
-        snprintf(path, 2*PATH_MAX, "%s/%s", cwd, entry->d_name);
-        printFileData(path, statistics, entry);
+        if (!(statistics->st_mode & S_IFDIR)){
+            snprintf(path, 2*PATH_MAX, "%s/%s", cwd, entry->d_name);
+            printFileData(path, statistics);
+        }
 
 
         if (strcmp(entry->d_name,".")!=0 &&

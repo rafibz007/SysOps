@@ -53,12 +53,35 @@ int main(int argc, char**argv){
 
     strcpy(coreDir, argv[1]);
 
+
+    struct stat* stats = calloc(1, sizeof(struct stat));
+    if (stats==NULL){
+        perror("Not enough memory");
+        exit(1);
+    }
+
+    int s = lstat(coreDir, stats);
+    if (s==-1){
+        fprintf(stderr, "Error reading stat from file: %s\n", coreDir);
+        exit(1);
+    }
+
+    switch (stats->st_mode & S_IFDIR) {
+        case S_IFDIR:
+            break;
+        default:
+            perror("Provide directory");
+            exit(1);
+            break;
+    }
+
+
+
     providedRelativePath = coreDir[0] != '/';
 
-
-
     printf("%6s   %10s   %15s   %25s   %25s   %s\n", "LINKS", "TYPE", "SIZE", "LAST_ACC", "LAST_MOD", "PATH");
-    nftw(coreDir, printAndCountFile, 1, 0);
+    nftw(coreDir, printAndCountFile, 10, FTW_PHYS);
+
     printf("Files: %lu  Dirs:%lu  CharDevs:%lu  BlockDevs:%lu  SLinks:%lu  FIFOs:%lu  Socks:%lu\n", res->files, res->dirs, res->charDevs, res->blocks, res->slinks, res->fifos, res->socks);
 
 
