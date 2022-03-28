@@ -14,10 +14,6 @@
 #include <sys/wait.h>
 
 
-void printData();
-
-
-
 int main(int argc, char* argv[]){
 
 //    PARSE INPUT
@@ -86,8 +82,6 @@ int main(int argc, char* argv[]){
 
         int ret;
         char* command;
-
-//        printf("%d-%s\n", getpid(), entry->d_name);
         switch (stats->st_mode & S_IFMT) {
             case S_IFREG:
 //                IF FILE EXECUTABLE
@@ -105,8 +99,7 @@ int main(int argc, char* argv[]){
                 strcat(command, string);
                 ret = system(command);
                 if (WEXITSTATUS(ret) == 0){
-                    printf("%d found: %s%s\n", getpid(), path,entry->d_name);
-                    printData();
+                    printf("PID %d found: %s%s\n", getpid(), path,entry->d_name);
                 }
                 free(command);
                 command = NULL;
@@ -144,5 +137,3 @@ int main(int argc, char* argv[]){
 
     return 0;
 }
-
-void printData(){}
