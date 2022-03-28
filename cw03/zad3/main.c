@@ -11,6 +11,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <limits.h>
+#include <sys/wait.h>
 
 
 void printData();
@@ -61,7 +62,6 @@ int main(int argc, char* argv[]){
 //    START SEARCHING
     chdir(coreDir);
     depth--;
-    printf("%s %s\n", argv[0], coreDir);
 
     char* path = calloc(PATH_MAX, sizeof(char));
     if (path == NULL){
@@ -69,7 +69,8 @@ int main(int argc, char* argv[]){
         exit(1);
     }
     strcpy(path, coreDir);
-    strcat(path, "/");
+    if (path[strlen(path)-1] != '/')
+        strcat(path, "/");
 
     while ((entry=readdir(dir))){
 
@@ -137,6 +138,9 @@ int main(int argc, char* argv[]){
     free(stats);
     closedir(dir);
     chdir("..");
+
+    int status = 0;
+    while (wait(&status) > 0);
 
     return 0;
 }
