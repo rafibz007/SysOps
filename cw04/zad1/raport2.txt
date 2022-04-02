@@ -1,0 +1,55 @@
+=== IGNORE ===
+10293: Main start
+10293: Main end
+10295: Fork start
+10295: Fork end
+10294: Exec start
+10294: Exec end
+
+Ignorowanie sygnalow dziedziczone przez oboje dzieci.
+
+
+
+
+=== HANDLER ===
+10460: Main start
+10460: Received signal: 10.
+10460: Main end
+10462: Fork start
+10462: Received signal: 10.
+10462: Fork end
+10461: Exec start
+
+Handler sygnalu dziedziczy jedynie fork, exec nie posiada obslugi tego sygnalu, wiec konczy dzialanie wczesniej.
+
+
+
+
+=== MASK ===
+10464: Main start
+10464: Main blocked: true
+10464: Main end
+10466: Fork start
+10466: Fork blocked: true
+10466: Fork end
+10465: Exec start
+10465: Exec blocked: true
+10465: Exec end
+
+Maska dziedziczona jest przez oboje dzieci.
+
+
+
+
+=== PENDING ===
+10473: Main start
+10473: Main has pending: true
+10473: Main end
+10475: Fork start
+10475: Fork has pending: false
+10475: Fork end
+10474: Exec start
+10474: Exec has pending: false
+10474: Exec end
+
+Nieosbluzone sygnaly procesu macierzystego sa czyszczone.
