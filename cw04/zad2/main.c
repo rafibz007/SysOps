@@ -68,15 +68,15 @@ void sigchild_handler(int sig){
 }
 
 void sigusr1_action(int sig, siginfo_t* info, void* ucontext){
-    printf("Got signal %d from PID=%d with signal code: %d\n", sig, info->si_pid, info->si_code);
+    printf("Got signal %d from PID=%d with signal code: %d\n", info->si_signo, info->si_pid, info->si_code);
 }
 
 void sigusr2_action(int sig, siginfo_t* info, void* ucontext){
-    printf("Got signal %d from PID=%d with value int: %d\n", sig, info->si_pid, info->si_value.sival_int);
+    printf("Got signal %d from PID=%d with value int: %d\n", info->si_signo, info->si_pid, info->si_value.sival_int);
 }
 
 void sigchild_action(int sig, siginfo_t* info, void* ucontext){
-    printf("Got signal %d from PID=%d with child exit code: %d\n", sig, info->si_pid, info->si_status);
+    printf("Got signal %d from PID=%d with child exit code: %d\n", info->si_signo, info->si_pid, info->si_status);
 }
 
 
