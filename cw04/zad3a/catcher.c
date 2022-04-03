@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
         VERIFY_SIGNAL=SIGRTMIN;
     }
 
-//    make mask for children to block signals
+//    make mask to block signals
     sigset_t sigblock;
     sigfillset(&sigblock);
     sigdelset(&sigblock, RECEIVE_SIGNAL);
