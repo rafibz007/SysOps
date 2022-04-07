@@ -115,6 +115,13 @@ int main(int argc, char* argv[]) {
 
 
 //    start listening
+
+    sigemptyset(&add_mask);
+    sigaddset(&add_mask, VERIFY_SIGNAL);
+
+    sigprocmask (SIG_BLOCK, &add_mask, &old_mask);
+
+
     LISTENING = true;
     if (fork()==0){
         sleep(1);
@@ -125,7 +132,13 @@ int main(int argc, char* argv[]) {
 
     printf("Sender starts listening...\n");
 
-    await_signal(VERIFY_SIGNAL);
+    while (!usr_interrupt)
+        sigsuspend(&old_mask);
+    usr_interrupt = false;
+
+    sigprocmask (SIG_UNBLOCK, &add_mask, NULL);
+
+
     setup_with_sigaction(SEND_SIGNAL, SA_SIGINFO, send_handler);
     setup_with_sigaction(VERIFY_SIGNAL, SA_SIGINFO, verify_handler);
 
