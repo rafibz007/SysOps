@@ -3,7 +3,11 @@
 #include <string.h>
 #include <limits.h>
 #include <ctype.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <assert.h>
 
+#define ARG_LIMIT 10
 
 /**
 Create table of function which will be run in order
@@ -32,6 +36,7 @@ void append_command(char* command);
 char *rstrstrip(char *s);
 char *strstrip(char *s);
 void parse_line_commands(char* line_commands);
+char** parse_command(char* command);
 
 int main(int argc, char* argv[]) {
 
@@ -114,11 +119,28 @@ int main(int argc, char* argv[]) {
     line_commands = NULL;
     line = NULL;
 
-
+    char** result;
     for (int i = 0; i < commands_size; ++i) {
         printf("c: %s\n", commands[i]);
+        result = parse_command(commands[i]);
+
+        for (int j = 0; *result[j]; ++j) {
+            printf("%s@", result[j]);
+        }
+        printf("\n");
+
+        for (int j = 0; *result[j]; ++j) {
+            free(result[j]);
+        }
+        free(result);
+        result = NULL;
     }
     printf("cap: %lu, size: %lu\n", commands_capacity, commands_size);
+
+    if (fork()==0)
+        execl("touch","touch", "haha.txt", NULL);
+    int status;
+    while (wait(&status)>0);
 
     return 0;
 }
@@ -168,6 +190,34 @@ void append_command(char* command){
     commands_size += 1;
 }
 
+char** parse_command(char* command){
+    char** result;
+    if ((result = calloc(ARG_LIMIT+1, sizeof(char*)))==NULL){
+        perror("Error");
+        exit(1);
+    }
+    result[ARG_LIMIT] = NULL;
+    for (int i = 0; i < ARG_LIMIT; ++i) {
+        if ((result[i] = calloc(PATH_MAX, sizeof(char)))==NULL){
+            perror("Error");
+            exit(1);
+        }
+    }
+
+
+    char delimeters[] = " ";
+    char * string;
+    string = strtok(command, delimeters );
+    size_t index = 0;
+    while(string != NULL )
+    {
+        strcpy(result[index], string);
+        string = strtok(NULL, delimeters );
+        index++;
+    }
+
+    return result;
+}
 
 char *rstrstrip(char *s)
 {
