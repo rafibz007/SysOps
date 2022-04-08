@@ -154,7 +154,7 @@ char* get_line_commands(const char* line){
 
 void append_command(char* command){
     if (commands_size >= commands_capacity){
-        if ((commands = realloc(commands, 2*commands_size))==NULL){
+        if ((commands = realloc(commands, 2*commands_size* sizeof(char *)))==NULL){
             perror("Error allocating memory");
             exit(1);
         }
