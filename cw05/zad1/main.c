@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
 
     if (argc<2){
         fprintf(stderr, "Provide: string of piped commands\n");
-        fprintf(stderr, "Example: %s składnik1 | składnik2 | składnik3", argv[0]);
+        fprintf(stderr, "Example: %s 'składnik1 | składnik2 | składnik3'", argv[0]);
         exit(1);
     }
 
