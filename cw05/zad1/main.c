@@ -8,24 +8,10 @@
 #include <assert.h>
 
 #define ARG_LIMIT 10
+#define READ 0
+#define WRITE 1
 
-/**
-Create table of function which will be run in order
-Parse input, for each skladnik_k find, parse and add commands to array
-Run in loop until end of commands creating children, parent should die in each iteration
-
-todo need to figure it out
-while not all commands executed
-    fork
-    pipe
-    child
-        if commands left
-            read from parent input and execute command
-    parent
-        send input either to child or to stdout if end of pipes
-**/
-
-char FILENAME[] = "../language.txt";
+char FILENAME[] = "language.txt";
 char** commands;
 size_t commands_capacity;
 size_t commands_size;
@@ -35,7 +21,6 @@ char* get_line_commands(const char* line);
 void append_command(char* command);
 char *rstrstrip(char *s);
 char *strstrip(char *s);
-void parse_line_commands(char* line_commands);
 char** parse_command(char* command);
 
 int main(int argc, char* argv[]) {
@@ -119,26 +104,65 @@ int main(int argc, char* argv[]) {
     line_commands = NULL;
     line = NULL;
 
+//    preparing pipes
+    size_t count = commands_size;
+    int **pipes = calloc(count, sizeof(int *));
+    for (int i = 0; i < count; ++i) {
+        pipes[i] = calloc(2, sizeof(int));
+        if (pipe(pipes[i]) < 0) {
+            fprintf(stderr, "Cannot make the pipe\n");
+            exit(1);
+        }
+    }
+
     char** result;
     for (int i = 0; i < commands_size; ++i) {
         printf("c: %s\n", commands[i]);
         result = parse_command(commands[i]);
 
-        for (int j = 0; *result[j]; ++j) {
-            printf("%s@", result[j]);
-        }
-        printf("\n");
+//        execute command and connect it to pipes
+        pid_t pid = fork();
+        if (pid == 0){
+//            set descriptors
+            if (i > 0){
+                dup2(pipes[i-1][READ], STDIN_FILENO);
+            }
+            if (i + 1 < count){
+                dup2(pipes[i][WRITE], STDOUT_FILENO);
+            }
 
-        for (int j = 0; *result[j]; ++j) {
+//            close pipe in children
+            for (int j = 0; j < count-1; ++j) {
+                close(pipes[j][READ]);
+                close(pipes[j][WRITE]);
+            }
+            execvp(result[0], result);
+            exit(0);
+        }
+
+
+        for (int j = 0; result[j] != NULL; ++j) {
             free(result[j]);
         }
         free(result);
         result = NULL;
     }
-    printf("cap: %lu, size: %lu\n", commands_capacity, commands_size);
 
-    if (fork()==0)
-        execl("touch","touch", "haha.txt", NULL);
+
+//    close pipes
+    for (int i = 0; i < count; ++i) {
+        close(pipes[i][READ]);
+        close(pipes[i][WRITE]);
+    }
+    for (int i = 0; i < count; ++i) {
+        wait(0);
+    }
+    for(int i = 0; i < count; i++){
+        free(pipes[i]);
+    }
+    free(pipes);
+
+
     int status;
     while (wait(&status)>0);
 
@@ -197,12 +221,6 @@ char** parse_command(char* command){
         exit(1);
     }
     result[ARG_LIMIT] = NULL;
-    for (int i = 0; i < ARG_LIMIT; ++i) {
-        if ((result[i] = calloc(PATH_MAX, sizeof(char)))==NULL){
-            perror("Error");
-            exit(1);
-        }
-    }
 
 
     char delimeters[] = " ";
@@ -211,10 +229,15 @@ char** parse_command(char* command){
     size_t index = 0;
     while(string != NULL )
     {
+        if ((result[index] = calloc(PATH_MAX, sizeof(char)))==NULL){
+            perror("Error");
+            exit(1);
+        }
         strcpy(result[index], string);
         string = strtok(NULL, delimeters );
         index++;
     }
+    result[index] = NULL;
 
     return result;
 }
