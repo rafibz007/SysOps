@@ -44,7 +44,8 @@ int main(){
 }
 
 void init(){
-    server_msqid = get_server_key();
+    key_t server_key = get_server_key();
+    server_msqid = get_queue(server_key);
 
     struct sigaction act1;
 
@@ -70,7 +71,7 @@ void init(){
     message_t init;
 
     init.type = TYPE_INIT;
-    snprintf(init.text, MESSAGE_BUFFER_SIZE-1, "%d", client_msqid);
+    snprintf(init.text, MESSAGE_BUFFER_SIZE-1, "%d", key);
     init.client_pid = getpid();
 
     send(server_msqid, &init);

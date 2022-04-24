@@ -33,7 +33,7 @@ void init();
 
 void handle_sigint(int sig);
 void handle_list(const message_t* message);
-void stop(const message_t* message);
+void handle_stop(const message_t* message);
 void handle_init(const message_t* message);
 void handle_2all(const message_t* message);
 void handle_2one(const message_t* message);
@@ -46,7 +46,6 @@ int main(){
 
     message_t message;
     while (1){
-        printf("Listening...\n");
         if (receive(server_msqid, &message)==-1){
             perror("Error receiving message\n");
             if (errno != EINTR){
@@ -55,11 +54,11 @@ int main(){
             continue;
         }
 
-        printf("Received message with type=%ld\n", message.type);
+//        printf("Received message with type=%ld\n", message.type);
 
         switch (message.type) {
             case TYPE_STOP:
-                stop(&message);
+                handle_stop(&message);
                 break;
             case TYPE_LIST:
                 handle_list(&message);
@@ -74,7 +73,7 @@ int main(){
                 handle_init(&message);
                 break;
             default:
-                fprintf(stderr, "Wrong message type");
+                fprintf(stderr, "Wrong message type\n");
                 break;
         }
     }
@@ -90,10 +89,10 @@ void init(){
 
     key_t key = get_server_key();
     if ((server_msqid = create_queue(key))==-1){
-        perror("Error creating server message queue");
+        perror("Error creating server message queue\n");
         exit(1);
     }
-    printf("Creating server=%d\n", server_msqid);
+//    printf("Creating server=%d\n", server_msqid);
 
     for (int i = 0; i < MAX_CLIENTS; ++i) {
         client_is_set[i] = false;
@@ -146,17 +145,17 @@ void clean(){
 
         switch (message.type) {
             case TYPE_STOP:
-                stop(&message);
+                handle_stop(&message);
                 client_shutdown[message.client_id] = true;
                 break;
             default:
-                fprintf(stderr, "Waiting only for STOP messages");
+                fprintf(stderr, "Waiting only for STOP messages\n");
                 break;
         }
     }
 
     delete_queue(server_msqid);
-    printf("Server clean successfully\n");
+    printf("Server cleaned successfully\n");
 }
 
 void send_to_client(int client_msqid, int client_pid, message_t* message){
@@ -179,9 +178,10 @@ void handle_sigint(int sig){
 
 void handle_init(const message_t* message){
     key_t key;
-    scanf(message->text, "%d", &key);
+    key = (key_t) strtol(message->text, NULL, 10);
     int client_pid = message->client_pid;
     int client_msqid = get_queue(key);
+
 
     int free_client_id = find_free_client_id();
     if (free_client_id == -1){
@@ -203,6 +203,8 @@ void handle_init(const message_t* message){
     clients[free_client_id][CLIENT_PID] = client_pid;
     client_is_set[free_client_id] = true;
 
+    printf("Registered client=%d with id=%d\n", client_msqid, free_client_id);
+
     message_t init;
     init.type = TYPE_INIT;
     strcpy(init.text, "Successfully joined");
@@ -212,8 +214,13 @@ void handle_init(const message_t* message){
     send(client_msqid, &init);
 }
 
+void handle_stop(const message_t* message){
+    client_is_set[message->client_id] = false;
+    clients[message->client_id][CLIENT_MSQID] = -1;
+    clients[message->client_id][CLIENT_PID] = -1;
+    printf("Unregistered with id=%d\n", message->client_id);
+}
 //todo
 void handle_list(const message_t* message){}
-void stop(const message_t* message){}
 void handle_2all(const message_t* message){}
 void handle_2one(const message_t* message){}

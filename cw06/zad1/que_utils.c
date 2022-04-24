@@ -51,6 +51,7 @@ long receive(int msqid, message_t* message){
 // CREATING
 int create_queue(int key){
     return msgget(key, IPC_CREAT | IPC_EXCL | 0600);
+//    return msgget(key, IPC_CREAT | 0600);
 }
 
 int get_queue(int key){
