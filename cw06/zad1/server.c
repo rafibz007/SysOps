@@ -24,7 +24,6 @@
 #define CLIENT_PID 1
 int clients[MAX_CLIENTS][2]; // client_msqid, client_pid ; index - client_id
 bool client_is_set[MAX_CLIENTS];
-size_t clients_amount;
 
 int server_msqid;
 

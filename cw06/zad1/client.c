@@ -15,6 +15,7 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <limits.h>
 
 
 int server_msqid;
@@ -54,20 +55,12 @@ void init(){
     act1.sa_handler = handle_sigint;
     sigaction(SIGINT, &act1, NULL);
 
-    struct sigaction act2;
-    sigemptyset(&act2.sa_mask);
-    act2.sa_flags = 0;
-    act2.sa_handler = handle_message;
-    sigaction(MESSAGE_AWAITS, &act2, NULL);
-
     key_t key = get_client_key();
     if ((client_msqid = create_queue(key))==-1){
         perror("Error creating client message queue");
         exit(1);
     }
-    printf("Creating client=%d\n", client_msqid);
 
-    printf("Sending init message to server=%d...\n", server_msqid);
     message_t init;
 
     init.type = TYPE_INIT;
@@ -93,6 +86,7 @@ void init(){
                 break;
             case TYPE_INIT:
                 handle_init(&message);
+                initReceived = true;
                 break;
             case TYPE_INIT_ERROR:
                 fprintf(stderr, "Error connecting to server: %s\n", message.text);
@@ -104,6 +98,12 @@ void init(){
         }
     }
 
+    struct sigaction act2;
+    sigemptyset(&act2.sa_mask);
+    act2.sa_flags = 0;
+    act2.sa_handler = handle_message;
+    sigaction(MESSAGE_AWAITS, &act2, NULL);
+
     printf("Client initiated successfully\n");
 }
 
@@ -113,9 +113,10 @@ void clean(){
 }
 
 void handle_message(){
+    printf("Received message\n");
     message_t message;
     while (!is_empty(client_msqid)){
-        if (receive(server_msqid, &message)==-1){
+        if (receive(client_msqid, &message)==-1){
             perror("Error receiving message\n");
             if (errno != EINTR){
                 exit(1);
@@ -167,7 +168,12 @@ void handle_close(const message_t* message){
     stop();
 }
 
-void pick_action(){}
+void pick_action(){
+    char *input = calloc(PATH_MAX, sizeof(char));
+    printf("> ");
+    scanf("%s\n", input);
+    printf("Got: %s\n", input);
+}
 
 void handle_list(const message_t* message){}
 void handle_2all(const message_t* message){}
