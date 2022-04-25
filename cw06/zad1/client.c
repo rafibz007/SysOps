@@ -5,18 +5,10 @@
 #include <signal.h>
 #include <errno.h>
 #include <stdbool.h>
-
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
-#include <signal.h>
 #include <string.h>
-#include <time.h>
-#include <errno.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 #include <limits.h>
-#include <ctype.h>
 
 #define TYPE_STOP_STR "STOP"
 #define TYPE_LIST_STR "LIST"
@@ -112,6 +104,7 @@ void init(){
     sigaction(MESSAGE_AWAITS, &act2, NULL);
 
     printf("Client initiated successfully\n");
+    printf("Your id=%d\n", client_id);
 }
 
 void clean(){
@@ -155,8 +148,8 @@ void handle_init(const message_t* message){
 }
 
 void handle_sigint(int sig){
-    stop();
     printf("Client exiting\n");
+    stop();
 }
 
 void stop(){
@@ -194,7 +187,28 @@ void pick_action(){
         send(server_msqid, &message);
     } else if (strcmp(action, TYPE_2ALL_STR)==0){
 
+        message.type = TYPE_2ALL;
+        char* text = strtok(NULL, "\n");
+        if (text == NULL){
+            fprintf(stderr, "2ALL text\n");
+            return;
+        }
+        strcpy(message.text, text);
+        send(server_msqid, &message);
+
     } else if (strcmp(action, TYPE_2ONE_STR)==0){
+
+        message.type = TYPE_2ONE;
+        char* id = strtok(NULL, " ");
+        char* text = strtok(NULL, "\n");
+        if (id == NULL || text == NULL){
+            fprintf(stderr, "2ONE id text\n");
+            return;
+        }
+//        printf("id: %d, text: %s", (int)strtol(id, NULL, 10), text);
+        strcpy(message.text, text);
+        message.receiver_id = (int)strtol(id, NULL, 10);
+        send(server_msqid, &message);
 
     } else if (strcmp(action, TYPE_STOP_STR)==0){
         stop();

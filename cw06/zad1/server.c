@@ -5,18 +5,14 @@
 #include <signal.h>
 #include <errno.h>
 #include <stdbool.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <signal.h>
 #include <string.h>
-#include <time.h>
-#include <errno.h>
 #include <sys/types.h>
-#include <sys/wait.h>
-#include <math.h>
+#include <time.h>
+#include <ctype.h>
 
+
+#define LOG_FILE "server_log.txt"
+FILE* log_file;
 
 #define MAX_CLIENTS 10
 
@@ -33,11 +29,12 @@ void init();
 void handle_sigint(int sig);
 void handle_list(const message_t* message);
 void handle_stop(const message_t* message);
-void handle_init(const message_t* message);
+int handle_init(const message_t* message);
 void handle_2all(const message_t* message);
 void handle_2one(const message_t* message);
 void send_to_client(int client_msqid, int client_pid, message_t* message);
 int find_free_client_id();
+char *strstrip(char *s);
 size_t number_len(int num){
     size_t count = 0;
     while(num!=0){
@@ -52,6 +49,8 @@ int main(){
     init();
 
     message_t message;
+    size_t LOG_MAX_LEN = MESSAGE_BUFFER_SIZE+number_len(MAX_CLIENTS)+30;
+    char log[LOG_MAX_LEN];
     while (1){
         if (receive(server_msqid, &message)==-1){
             perror("Error receiving message\n");
@@ -61,32 +60,69 @@ int main(){
             continue;
         }
 
-//        printf("Received message with type=%ld\n", message.type);
-
         switch (message.type) {
-            case TYPE_STOP:
+            case TYPE_STOP: {
+                snprintf(log, LOG_MAX_LEN, "%s STOP from %d\n",
+                         strstrip(asctime(localtime(&message.timestamp))),
+                         message.client_id);
                 handle_stop(&message);
                 break;
-            case TYPE_LIST:
+            }
+            case TYPE_LIST: {
+                snprintf(log, LOG_MAX_LEN, "%s LIST from %d\n",
+                         strstrip(asctime(localtime(&message.timestamp))),
+                         message.client_id);
                 handle_list(&message);
                 break;
-            case TYPE_2ALL:
+            }
+            case TYPE_2ALL: {
+                snprintf(log, LOG_MAX_LEN, "%s 2ALL from %d - %s\n",
+                         strstrip(asctime(localtime(&message.timestamp))),
+                         message.client_id,
+                         message.text);
                 handle_2all(&message);
                 break;
-            case TYPE_2ONE:
+            }
+            case TYPE_2ONE: {
+                snprintf(log, LOG_MAX_LEN, "%s 2ONE from %d to %d - %s\n",
+                         strstrip(asctime(localtime(&message.timestamp))),
+                         message.client_id,
+                         message.receiver_id,
+                         message.text);
                 handle_2one(&message);
                 break;
-            case TYPE_INIT:
-                handle_init(&message);
+            }
+            case TYPE_INIT: {
+                int new_id;
+                if ((new_id = handle_init(&message)) == -1)
+                    snprintf(log, LOG_MAX_LEN, "%s INIT failed\n",
+                             strstrip(asctime(localtime(&message.timestamp))));
+                else
+                    snprintf(log, LOG_MAX_LEN, "%s INIT new client with id=%d\n",
+                             strstrip(asctime(localtime(&message.timestamp))), new_id);
                 break;
-            default:
+            }
+            default: {
+                snprintf(log, LOG_MAX_LEN, "%s WRONG TYPE: %ld\n",
+                         strstrip(asctime(localtime(&message.timestamp))),message.type);
                 fprintf(stderr, "Wrong message type\n");
                 break;
+            }
         }
+
+        printf("%s", log);
+        fwrite(log, sizeof(char), strlen(log), log_file);
+
     }
 }
 
 void init(){
+
+    if ((log_file = fopen(LOG_FILE, "a+"))==NULL){
+        fprintf(stderr, "Could not open log file\n");
+        exit(1);
+    }
+
     struct sigaction act;
     sigemptyset(&act.sa_mask);
     act.sa_flags = 0;
@@ -99,13 +135,14 @@ void init(){
         perror("Error creating server message queue\n");
         exit(1);
     }
-//    printf("Creating server=%d\n", server_msqid);
 
     for (int i = 0; i < MAX_CLIENTS; ++i) {
         client_is_set[i] = false;
         clients[i][0] = -1;
         clients[i][1] = -1;
     }
+
+
 
     printf("Server initiated successfully\n");
 }
@@ -162,6 +199,7 @@ void clean(){
     }
 
     delete_queue(server_msqid);
+    fclose(log_file);
     printf("Server cleaned successfully\n");
 }
 
@@ -183,7 +221,7 @@ void handle_sigint(int sig){
     exit(0);
 }
 
-void handle_init(const message_t* message){
+int handle_init(const message_t* message){
     key_t key;
     key = (key_t) strtol(message->text, NULL, 10);
     int client_pid = message->client_pid;
@@ -203,7 +241,7 @@ void handle_init(const message_t* message){
         error.timestamp = get_time();
 
         send(client_msqid, &error);
-        return;
+        return -1;
     }
 
 
@@ -211,7 +249,6 @@ void handle_init(const message_t* message){
     clients[free_client_id][CLIENT_PID] = client_pid;
     client_is_set[free_client_id] = true;
 
-    printf("Registered client=%d with id=%d\n", client_msqid, free_client_id);
 
     message_t init;
     init.type = TYPE_INIT;
@@ -221,13 +258,13 @@ void handle_init(const message_t* message){
     init.timestamp = get_time();
 
     send(client_msqid, &init);
+    return free_client_id;
 }
 
 void handle_stop(const message_t* message){
     client_is_set[message->client_id] = false;
     clients[message->client_id][CLIENT_MSQID] = -1;
     clients[message->client_id][CLIENT_PID] = -1;
-    printf("Unregistered with id=%d\n", message->client_id);
 }
 
 void handle_list(const message_t* message){
@@ -253,5 +290,61 @@ void handle_list(const message_t* message){
     send_to_client(client_msqid, response.client_pid, &response);
 }
 
-void handle_2all(const message_t* message){}
-void handle_2one(const message_t* message){}
+void handle_2all(const message_t* message){
+    int receiver_msqid;
+    int receiver_pid;
+    message_t new_message;
+    new_message.client_id = message->client_id;
+    new_message.timestamp = get_time();
+    new_message.type = TYPE_2ALL;
+    new_message.client_pid = message->client_pid;
+    strcpy(new_message.text, message->text);
+
+    for (int i = 0; i < MAX_CLIENTS; ++i) {
+        if (client_is_set[i] && message->client_id != i){
+            receiver_msqid = clients[i][CLIENT_MSQID];
+            receiver_pid = clients[i][CLIENT_PID];
+            new_message.receiver_id = i;
+            send_to_client(receiver_msqid, receiver_pid, &new_message);
+        }
+    }
+}
+
+void handle_2one(const message_t* message){
+    int receiver_msqid;
+    int receiver_pid;
+
+    message_t new_message;
+    new_message.client_id = message->client_id;
+    new_message.timestamp = get_time();
+    new_message.type = TYPE_2ONE;
+    new_message.client_pid = message->client_pid;
+    new_message.receiver_id = message->receiver_id;
+    receiver_msqid = clients[new_message.receiver_id][CLIENT_MSQID];
+    receiver_pid = clients[new_message.receiver_id][CLIENT_PID];
+
+    strcpy(new_message.text, message->text);
+
+    send_to_client(receiver_msqid, receiver_pid, &new_message);
+}
+
+char *strstrip(char *s)
+{
+    size_t size;
+    char *end;
+
+    size = strlen(s);
+
+    if (!size)
+        return s;
+
+    end = s + size - 1;
+    while (end >= s && isspace(*end))
+        end--;
+    *(end + 1) = '\0';
+
+    while (*s && isspace(*s))
+        s++;
+
+    return s;
+}
