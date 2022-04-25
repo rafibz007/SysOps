@@ -43,6 +43,7 @@ key_t get_server_key();
 
 key_t get_client_key();
 
+time_t get_time();
 // QUEUE UTILS
 // SENDING
 int send_with_flag(int msqid, message_t* message, int msgflg);

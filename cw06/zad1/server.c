@@ -15,7 +15,7 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-
+#include <math.h>
 
 
 #define MAX_CLIENTS 10
@@ -38,6 +38,14 @@ void handle_2all(const message_t* message);
 void handle_2one(const message_t* message);
 void send_to_client(int client_msqid, int client_pid, message_t* message);
 int find_free_client_id();
+size_t number_len(int num){
+    size_t count = 0;
+    while(num!=0){
+        num=num/10;
+        count++;
+    }
+    return count;
+}
 
 int main(){
     atexit(clean);
@@ -192,6 +200,7 @@ void handle_init(const message_t* message){
         error.client_pid = client_pid;
         error.receiver_id = -1;
         error.client_id = -1;
+        error.timestamp = get_time();
 
         send(client_msqid, &error);
         return;
@@ -209,6 +218,7 @@ void handle_init(const message_t* message){
     strcpy(init.text, "Successfully joined");
     init.receiver_id = free_client_id;
     init.client_id = free_client_id;
+    init.timestamp = get_time();
 
     send(client_msqid, &init);
 }
@@ -219,7 +229,29 @@ void handle_stop(const message_t* message){
     clients[message->client_id][CLIENT_PID] = -1;
     printf("Unregistered with id=%d\n", message->client_id);
 }
-//todo
-void handle_list(const message_t* message){}
+
+void handle_list(const message_t* message){
+    message_t response;
+    response.receiver_id = message->client_id;
+    response.client_pid = message->client_pid;
+    response.type = TYPE_LIST;
+    response.timestamp = get_time();
+
+    strcpy(response.text, "");
+
+    size_t str_len = number_len(MAX_CLIENTS);
+    char *string = calloc(str_len+2, sizeof(char));
+    for (int i = 0; i < MAX_CLIENTS; ++i) {
+        if (client_is_set[i]){
+            snprintf(string, str_len+1, "%d ", i);
+            strcat(response.text, string);
+        }
+    }
+    free(string);
+
+    int client_msqid = clients[message->client_id][CLIENT_MSQID];
+    send_to_client(client_msqid, response.client_pid, &response);
+}
+
 void handle_2all(const message_t* message){}
 void handle_2one(const message_t* message){}

@@ -16,7 +16,12 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <limits.h>
+#include <ctype.h>
 
+#define TYPE_STOP_STR "STOP"
+#define TYPE_LIST_STR "LIST"
+#define TYPE_2ALL_STR "2ALL"
+#define TYPE_2ONE_STR "2ONE"
 
 int server_msqid;
 int client_msqid;
@@ -34,6 +39,7 @@ void handle_2all(const message_t* message);
 void handle_2one(const message_t* message);
 void handle_close(const message_t* message);
 void handle_message();
+
 
 int main(){
     atexit(clean);
@@ -66,6 +72,7 @@ void init(){
     init.type = TYPE_INIT;
     snprintf(init.text, MESSAGE_BUFFER_SIZE-1, "%d", key);
     init.client_pid = getpid();
+    init.timestamp = get_time();
 
     send(server_msqid, &init);
 
@@ -113,7 +120,6 @@ void clean(){
 }
 
 void handle_message(){
-    printf("Received message\n");
     message_t message;
     while (!is_empty(client_msqid)){
         if (receive(client_msqid, &message)==-1){
@@ -148,7 +154,6 @@ void handle_init(const message_t* message){
     client_id = message->client_id;
 }
 
-//todo
 void handle_sigint(int sig){
     stop();
     printf("Client exiting\n");
@@ -169,12 +174,44 @@ void handle_close(const message_t* message){
 }
 
 void pick_action(){
-    char *input = calloc(PATH_MAX, sizeof(char));
-    printf("> ");
-    scanf("%s\n", input);
-    printf("Got: %s\n", input);
+    char input[PATH_MAX] = "";
+    printf(">");
+    fgets(input, PATH_MAX-1, stdin);
+
+    char* action = strtok(input, " \n");
+
+    if (action == NULL){
+        return;
+    }
+
+
+    message_t message;
+    message.client_id = client_id;
+    message.client_pid = getpid();
+    message.timestamp = get_time();
+    if (strcmp(action, TYPE_LIST_STR)==0){
+        message.type = TYPE_LIST;
+        send(server_msqid, &message);
+    } else if (strcmp(action, TYPE_2ALL_STR)==0){
+
+    } else if (strcmp(action, TYPE_2ONE_STR)==0){
+
+    } else if (strcmp(action, TYPE_STOP_STR)==0){
+        stop();
+    } else {
+        fprintf(stderr, "'%s' is not valid action.\n", action);
+    }
+
 }
 
-void handle_list(const message_t* message){}
-void handle_2all(const message_t* message){}
-void handle_2one(const message_t* message){}
+void handle_list(const message_t* message){
+    printf(">LIST: %s\n", message->text);
+}
+
+void handle_2all(const message_t* message){
+    printf(">2ALL: %d - %s\n", message->client_id, message->text);
+}
+
+void handle_2one(const message_t* message){
+    printf(">2ONE: %d - %s\n", message->client_id, message->text);
+}

@@ -1,5 +1,6 @@
 #define _XOPEN_SOURCE 500
 
+#include <time.h>
 #include "que_utils.h"
 
 // KEYS
@@ -19,6 +20,10 @@ key_t get_client_key(){
         perror("Error generating client key");
     }
     return key;
+}
+
+time_t get_time(){
+    return time(0);
 }
 
 // QUEUE UTILS
