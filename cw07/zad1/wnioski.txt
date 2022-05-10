@@ -1,0 +1,9 @@
+N,M = 3
+Kucharze nieustannie pracuja do czasu zapelnienia sie stolu, pozniej robia przerwy oczekujac na jego zwolnienie.
+Dostawcy nie maja przerw i ciagle rozworza pizze.
+
+N,M = 8
+Kucharze maja wieksze przerwy w oczekiwaniu na mozliwosc pracy
+Dostawcy w dalszym ciagu nieprzerwanie pracuja, bo stol zapelnia sie szybko
+
+Ogolnie brak kolizji, wszystko dziala poprawnie.
