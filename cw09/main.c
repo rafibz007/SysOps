@@ -6,12 +6,11 @@
 #include <pthread.h>
 
 #define REINDEER_AMOUNT 9
-#define MINMAX_REINDEERS_WAITING 9
 #define MIN_REINDEER_HOLIDAY_TIME 5
 #define MAX_REINDEER_HOLIDAY_TIME 10
 
-#define MIN_SANTA_DELIVERING_PRESENTS_TIME 1
-#define MAX_SANTA_DELIVERING_PRESENTS_TIME 2
+#define MIN_SANTA_DELIVERING_PRESENTS_TIME 2
+#define MAX_SANTA_DELIVERING_PRESENTS_TIME 4
 
 #define DELIVERIES_AMOUNT 3
 int deliveries = 0;
@@ -42,6 +41,7 @@ void notify_reindeers_delivering();
 
 void set_reindeers_waiting(bool);
 void notify_reindeers_waiting();
+
 
 int main(){
     srand(time(NULL));
@@ -104,7 +104,6 @@ void* santa(void* arg){
 }
 
 void* reindeer(void* arg){
-//    todo
     int selfID = *(int*)arg;
 
     while (true){
