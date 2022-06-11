@@ -44,6 +44,7 @@ int main(int argc, char* argv[]){
     pthread_create(&pthread, NULL, &ping_clients, NULL);
 
     srand(getpid());
+    printf("\n=== SERVER RUNNING... ===\n\n");
     while (true){
         int waiting_client_fd = check_socket_messages(unix_socket, inet_socket);
 
