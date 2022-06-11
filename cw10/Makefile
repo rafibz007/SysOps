@@ -1,5 +1,6 @@
 CC=gcc
 CFLAGS=-Wall
+PORT=1235
 
 all: test
 
@@ -10,10 +11,10 @@ test:
 	@echo "  make run_client_unix"
 
 run_server: server
-	./server 1234 socket
+	./server $(PORT) socket
 
 run_client_inet: client
-	./client client1 inet localhost:1234
+	./client client1 inet localhost:$(PORT)
 
 run_client_unix: client
 	./client client2 unix socket
