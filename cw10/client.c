@@ -1,11 +1,12 @@
 #include "utils.h"
 
-int server_socket;
 bool client_is_O;
-char buffer[MAX_MSG_LEN + 1];
+int server_socket;
 char *name, *command, *arg;
+char buffer[MAX_MSG_LEN + 1];
+game_state current_game_state = GAME_INIT;
 game_board client_game_board;
-game_state current_state = START;
+bool game_thread_run;
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
@@ -18,15 +19,18 @@ tile_state check_winning_sign(game_board *board);
 void check_game_status();
 game_board init_board();
 void draw_board();
-void connect_inet(char* port);
-void connect_local(char* path);
+void connect_inet(char* ip_and_port);
+void connect_unix(char* socket_path);
 void listen_to_server();
 
-void manage_start();
-void manage_wait_for_opponent();
-void manage_wait_for_move();
+void manage_game_init();
+void manage_no_opponent_yet();
+void manage_wait_for_opponent_move();
 void manage_opponent_move();
-void manage_move();
+void manage_your_move();
+
+void manage_add();
+void manage_ping();
 
 
 int main(int argc, char* argv[]){
@@ -41,8 +45,8 @@ int main(int argc, char* argv[]){
     name = argv[1];
 
     if (strcmp(argv[2], "unix") == 0){
-        char* path = argv[3];
-        connect_local(path);
+        char* socket_path = argv[3];
+        connect_unix(socket_path);
     }else if (strcmp(argv[2], "inet") == 0){
         char* ip_and_port = argv[3];
         connect_inet(ip_and_port);
@@ -59,10 +63,27 @@ int main(int argc, char* argv[]){
     return 0;
 }
 
+void start_game(){
+    while (true){
 
-void parse_command(char* msg){
-    command = strtok(msg, ":");
-    arg = strtok(NULL, ":");
+        if (current_game_state != GAME_INIT && current_game_state != NO_OPPONENT_YET && current_game_state != OPPONENT_MOVE){
+            printf("\n");
+            draw_board();
+        }
+
+        if (current_game_state == GAME_INIT)
+            manage_game_init();
+        else if (current_game_state == NO_OPPONENT_YET)
+            manage_no_opponent_yet();
+        else if (current_game_state == WAIT_FOR_OPPONENT_MOVE)
+            manage_wait_for_opponent_move();
+        else if (current_game_state == OPPONENT_MOVE)
+            manage_opponent_move();
+        else if (current_game_state == YOUR_MOVE)
+            manage_your_move();
+        else if (current_game_state == EXIT)
+            close_program();
+    }
 }
 
 tile_state check_winning_sign(game_board *board){
@@ -121,6 +142,11 @@ void close_program(){
     exit(0);
 }
 
+void parse_command(char* msg){
+    command = strtok(msg, ":");
+    arg = strtok(NULL, ":");
+}
+
 void check_game_status(){
     bool game_won = false;
 
@@ -135,51 +161,26 @@ void check_game_status(){
     tile_state winning_tile = check_winning_sign(&client_game_board);
     if (winning_tile != FREE){
         if ((client_is_O && winning_tile == O) || (!client_is_O && winning_tile == X)){
-            printf("You won!\n");
+            printf("\n=== YOU WIN! ===\n");
         } else {
-            printf("You lost!\n");
+            printf("\n=== YOU LOSE! ===\n");
         }
 
         game_won = true;
     }
 
     if (game_won || game_drawn)
-        current_state = QUIT;
+        current_game_state = EXIT;
 
     if (game_drawn && !game_won)
-        printf("Draw!\n");
+        printf("\n=== DRAW! ===\n");
 
-}
-
-
-void start_game(){
-    while (true){
-
-        if (current_state!=START && current_state!=WAIT_FOR_OPPONENT && current_state!=OPPONENT_MOVE){
-            printf("\n");
-            draw_board();
-        }
-
-        if (current_state == START)
-            manage_start();
-        else if (current_state == WAIT_FOR_OPPONENT)
-            manage_wait_for_opponent();
-        else if (current_state == WAIT_FOR_MOVE)
-            manage_wait_for_move();
-        else if (current_state == OPPONENT_MOVE)
-            manage_opponent_move();
-        else if (current_state == MOVE)
-            manage_move();
-        else if (current_state == QUIT)
-            close_program();
-    }
 }
 
 game_board init_board(){
     game_board board = {true,{FREE, FREE, FREE, FREE, FREE, FREE, FREE, FREE, FREE}};
     return board;
 }
-
 
 void draw_board(){
     char symbol;
@@ -200,37 +201,37 @@ void draw_board(){
     }
 }
 
-void manage_start(){
+void manage_game_init(){
     if (strcmp(arg, ARG_NAME_USED) == 0)
         exit(1);
     else if (strcmp(arg, ARG_NO_OPPONENT) == 0)
-        current_state = WAIT_FOR_OPPONENT;
-    else{
+        current_game_state = NO_OPPONENT_YET;
+    else {
         client_game_board = init_board();
         client_is_O = arg[0] == 'O';
-        current_state = client_is_O ? MOVE : WAIT_FOR_MOVE;
+        current_game_state = client_is_O ? YOUR_MOVE : WAIT_FOR_OPPONENT_MOVE;
     }
 }
 
-void manage_wait_for_opponent(){
+void manage_no_opponent_yet(){
     printf("Waiting for opponent\n");
     pthread_mutex_lock(&mutex);
 
-    while (current_state != START && current_state != QUIT)
+    while (current_game_state != GAME_INIT && current_game_state != EXIT)
         pthread_cond_wait(&cond, &mutex);
 
     pthread_mutex_unlock(&mutex);
 
     client_game_board = init_board();
     client_is_O = arg[0] == 'O';
-    current_state = client_is_O ? MOVE : WAIT_FOR_MOVE;
+    current_game_state = client_is_O ? YOUR_MOVE : WAIT_FOR_OPPONENT_MOVE;
 }
 
-void manage_wait_for_move(){
+void manage_wait_for_opponent_move(){
     printf("Waiting for opponent move\n");
 
     pthread_mutex_lock(&mutex);
-    while (current_state != OPPONENT_MOVE && current_state != QUIT)
+    while (current_game_state != OPPONENT_MOVE && current_game_state != EXIT)
         pthread_cond_wait(&cond, &mutex);
 
     pthread_mutex_unlock(&mutex);
@@ -240,11 +241,11 @@ void manage_opponent_move(){
     int pos = (int)strtol(arg, NULL, 10);
     make_move(&client_game_board, pos);
     check_game_status();
-    if (current_state != QUIT)
-        current_state = MOVE;
+    if (current_game_state != EXIT)
+        current_game_state = YOUR_MOVE;
 }
 
-void manage_move(){
+void manage_your_move(){
     int pos;
     do{
         printf("Make move (%c)[1-9]: ", client_is_O ? 'O' : 'X');
@@ -257,32 +258,40 @@ void manage_move(){
     send(server_socket, buffer, MAX_MSG_LEN, 0);
 
     check_game_status();
-    if (current_state != QUIT)
-        current_state = WAIT_FOR_MOVE;
+    if (current_game_state != EXIT)
+        current_game_state = WAIT_FOR_OPPONENT_MOVE;
+}
+
+void manage_add(){
+    current_game_state = GAME_INIT;
+    if (!game_thread_run) {
+        pthread_t t;
+        pthread_create(&t, NULL, (void *(*)(void *)) start_game, NULL);
+        game_thread_run = true;
+    }
+}
+
+void manage_ping(){
+    sprintf(buffer, "%s: :%s", COMMAND_RE_PING, name);
+    send(server_socket, buffer, MAX_MSG_LEN, 0);
 }
 
 void listen_to_server() {
-    bool game_thread_run = false;
+    game_thread_run = false;
     while (true) {
         recv(server_socket, buffer, MAX_MSG_LEN, 0);
         parse_command(buffer);
 
         pthread_mutex_lock(&mutex);
-        if (strcmp(command, COMMAND_PING) == 0){
-            sprintf(buffer, "%s: :%s", COMMAND_RE_PING, name);
-            send(server_socket, buffer, MAX_MSG_LEN, 0);
-        } else if (strcmp(command, COMMAND_ADD) == 0) {
-            current_state = START;
-            if (!game_thread_run) {
-                pthread_t t;
-                pthread_create(&t, NULL, (void *(*)(void *)) start_game, NULL);
-                game_thread_run = true;
-            }
-        } else if (strcmp(command, COMMAND_END) == 0){
-            current_state = QUIT;
+        if (strcmp(command, COMMAND_PING) == 0)
+            manage_ping();
+        else if (strcmp(command, COMMAND_ADD) == 0)
+            manage_add();
+        else if (strcmp(command, COMMAND_MOVE) == 0)
+            current_game_state = OPPONENT_MOVE;
+        else if (strcmp(command, COMMAND_END) == 0){
+            current_game_state = EXIT;
             exit(0);
-        } else if (strcmp(command, COMMAND_MOVE) == 0){
-            current_state = OPPONENT_MOVE;
         }
         pthread_cond_signal(&cond);
         pthread_mutex_unlock(&mutex);
@@ -317,13 +326,13 @@ void connect_inet(char* ip_and_port){
     freeaddrinfo(info);
 }
 
-void connect_local(char* path){
+void connect_unix(char* socket_path){
     server_socket = socket(AF_UNIX, SOCK_STREAM, 0);
 
     struct sockaddr_un sock_addr;
     memset(&sock_addr, 0, sizeof(struct sockaddr_un));
     sock_addr.sun_family = AF_UNIX;
-    strcpy(sock_addr.sun_path, path);
+    strcpy(sock_addr.sun_path, socket_path);
 
     if (connect(server_socket, (struct sockaddr *)&sock_addr, sizeof(sock_addr)) == -1) {
         printf("Error while connecting to LOCAL socket (%s)\n", strerror(errno));

@@ -26,9 +26,9 @@
 #define ARG_NO_OPPONENT "no_opponent"
 
 enum tile_state{
-    FREE,
     O,
-    X
+    X,
+    FREE
 };
 typedef enum tile_state tile_state;
 
@@ -39,12 +39,12 @@ struct game_board{
 typedef struct game_board game_board;
 
 enum game_state{
-    START,
-    WAIT_FOR_OPPONENT,
+    GAME_INIT,
+    NO_OPPONENT_YET,
     OPPONENT_MOVE,
-    WAIT_FOR_MOVE,
-    MOVE,
-    QUIT
+    WAIT_FOR_OPPONENT_MOVE,
+    YOUR_MOVE,
+    EXIT
 };
 typedef enum game_state game_state;
 

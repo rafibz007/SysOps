@@ -1,15 +1,21 @@
 CC=gcc
 CFLAGS=-Wall
 
-all: client server
+all: test
+
+test:
+	@echo "Use following command in different terminals:"
+	@echo "  make run_server"
+	@echo "  make run_client_inet"
+	@echo "  make run_client_unix"
 
 run_server: server
 	./server 1234 socket
 
-run_client1: client
+run_client_inet: client
 	./client client1 inet localhost:1234
 
-run_client2: client
+run_client_unix: client
 	./client client2 unix socket
 
 client:
